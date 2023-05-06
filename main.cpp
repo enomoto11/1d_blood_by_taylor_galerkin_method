@@ -66,11 +66,11 @@ int main(int argc, char *argv[])
 
   using namespace Eigen;
   int N = ELEMENT_NUM, M = 1200;
-  double dt = 5.0e-2;      // 時間刻み
-  double DELTA_X = 1.0e-2; // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
+  double dt = 5.0e0;        // 時間刻み
+  double DELTA_X = 1.0e-02; // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
   const double PI = acos(-1);
   const double h0 = 1.0e-03;  // 初期状態のtubeの厚さ
-  const double K_R = 1.0e0;   // K_R
+  const double K_R = 1.0e-04; // K_R
   const double rho = 1.0e-03; // 密度
   const double E = 1.0e5;     // ヤング率(0.1MPa)
 
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 
   int d = 100;
   // 見たい時刻t=0~200
-  std::ofstream ofs("output/out_taylor.dat");
+  std::ofstream ofs("output/flowQuantity.dat");
   for (int i = 0; i < 7; i++)
   {
     for (int j = 0; j < d + 1; j++)
@@ -195,6 +195,16 @@ int main(int argc, char *argv[])
     ofs << std::endl;
   }
   ofs.close();
+
+  std::ofstream ofs2("output/area.dat");
+  for (int i = 0; i < 7; i++)
+  {
+    for (int j = 0; j < d + 1; j++)
+    {
+      ofs2 << area[i * 200][j] << " ";
+    }
+    ofs2 << std::endl;
+  }
 
   return 0;
 }
