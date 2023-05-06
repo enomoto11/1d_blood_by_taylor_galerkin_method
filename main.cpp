@@ -33,10 +33,23 @@ int Countnumofline(std::string file)
   return numofnode;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   int NODE_NUM = Countnumofline("input/node_d.dat");
   int ELEMENT_NUM = Countnumofline("input/element_d.dat");
+
+  int M = 1200;             // 時間ステップ数
+  double dt = 1.0e-03;      // 時間刻み
+  double DELTA_X = 1.0e-02; // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
+  const double PI = acos(-1);
+  const double h0 = 1.0e-03;  // 初期状態のtubeの厚さ
+  const double K_R = 1.0e-04; // K_R
+  const double rho = 1.0e-03; // 密度
+  const double E = 1.0e5;     // ヤング率(0.1MPa)
+
+  const double A0 = PI * (9.0e-03) * (9.0e-03);                // 初期状態のtubeの流路面積（位置座標によらない）
+  const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
+  // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
   std::vector<std::vector<double>> node(NODE_NUM, std::vector<double>(3, 0));
   std::ifstream ifs("input/node_d.dat"); // ファイル入力
@@ -65,47 +78,25 @@ int main(int argc, char *argv[])
   ifs1.close();
 
   using namespace Eigen;
-  int N = ELEMENT_NUM, M = 1200;
-  double dt = 5.0e0;        // 時間刻み
-  double DELTA_X = 1.0e-02; // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
-  const double PI = acos(-1);
-  const double h0 = 1.0e-03;  // 初期状態のtubeの厚さ
-  const double K_R = 1.0e-04; // K_R
-  const double rho = 1.0e-03; // 密度
-  const double E = 1.0e5;     // ヤング率(0.1MPa)
-
-  const double A0 = PI * (9.0e-03) * (9.0e-03);                // 初期状態のtubeの流路面積（位置座標によらない）
-  const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
-  // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
   std::vector<std::vector<double>>
       flowQuantity(M + 1, std::vector<double>(NODE_NUM, 0.0));
   std::vector<std::vector<double>> area(M + 1, std::vector<double>(NODE_NUM, 0.0));
+  std::vector<std::vector<double>> velocity(M + 1, std::vector<double>(NODE_NUM, 0.0));
 
-  // init Q and A which we want to calculate
+  // init Q and A (which we want to calculate)
   for (int i = 0; i < NODE_NUM; i++)
   {
-    if ((i >= 1) && (i <= 50))
+    area[0][i] = A0;
+    // 初期状態のnodeに与える速度はノード点の位置によって変える
+    if (i >= 0 && i <= NODE_NUM / 2)
     {
-      flowQuantity[0][i] = 1.0;
+      velocity[0][i] = 1.0e0;
     }
-    else
-    {
-      flowQuantity[0][i] = 0.0;
-    }
-  }
-  for (int i = 0; i < NODE_NUM; i++)
-  {
-    if ((i >= 1) && (i <= 50))
-    {
-      area[0][i] = 1.0;
-    }
-    else
-    {
-      area[0][i] = 0.0;
-    }
+    flowQuantity[0][i] = area[0][i] * velocity[0][i];
   }
 
+  // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
   {
     Eigen::MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
@@ -157,7 +148,7 @@ int main(int argc, char *argv[])
       b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
     }
 
-    for (int j = 0; j < N + 1; j++)
+    for (int j = 0; j < ELEMENT_NUM + 1; j++)
     {
       A_area(0, j) = 0.0e0;
       A_flowQuantity(0, j) = 0.0e0;
@@ -167,8 +158,8 @@ int main(int argc, char *argv[])
     b_area(0) = 0.0e0;
     b_flowQuantity(0) = 0.0e0;
 
-    Eigen::VectorXd x_area = VectorXd::Zero(N + 1);
-    Eigen::VectorXd x_flowQuantity = VectorXd::Zero(N + 1);
+    Eigen::VectorXd x_area = VectorXd::Zero(ELEMENT_NUM + 1);
+    Eigen::VectorXd x_flowQuantity = VectorXd::Zero(ELEMENT_NUM + 1);
 
     // 行列計算
     x_area = A_area.fullPivLu().solve(b_area);
