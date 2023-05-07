@@ -162,12 +162,9 @@ int main()
     // b_area(0) = 0.0e0;
     // b_flowQuantity(0) = 0.0e0;
 
-    Eigen::VectorXd x_area = VectorXd::Zero(ELEMENT_NUM + 1);
-    Eigen::VectorXd x_flowQuantity = VectorXd::Zero(ELEMENT_NUM + 1);
-
     // 行列計算
-    x_area = A_area.fullPivLu().solve(b_area);
-    x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
+    Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
+    Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
 
     for (int j = 0; j < x_area.size(); j++)
     {
