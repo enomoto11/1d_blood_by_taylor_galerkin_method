@@ -1,0 +1,17 @@
+name: Cppcheck
+
+on: [push]
+
+jobs:
+  cppcheck:
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Cppcheck
+        run: brew install cppcheck
+
+      - name: Run Cppcheck
+        run: cppcheck --enable=all --error-exitcode=1 --std=c++11 --language=c++ --verbose --suppress=missingIncludeSystem ./
