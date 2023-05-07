@@ -38,15 +38,16 @@ int main()
   int NODE_NUM = Countnumofline("input/node_d.dat");
   int ELEMENT_NUM = Countnumofline("input/element_d.dat");
 
-  const int M = 1200;                                          // 時間ステップ数
-  const double dt = 1.0e-03;                                   // 時間刻み
-  const double DELTA_X = 1.0e-02;                              // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
+  const double L = 1.0e-02;                                    // tubeの長さ[m]
+  const int M = 1200;                                          // 時間ステップ数[-]
+  const double dt = 1.0e-03;                                   // 時間刻み[s]
+  const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
   const double PI = M_PI;                                      // 円周率
-  const double h0 = 1.0e-03;                                   // 初期状態のtubeの厚さ
-  const double K_R = 1.0e-04;                                  // K_R
-  const double rho = 1.0e-03;                                  // 密度
-  const double E = 1.0e5;                                      // ヤング率(0.1MPa)
-  const double A0 = PI * pow(9.0e-03, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）
+  const double h0 = 1.0e-03;                                   // 初期状態のtubeの厚さ[m]
+  const double K_R = 3.3e-06;                                  // 粘性抵抗K_R[m^2/s]
+  const double rho = 1060000;                                  // 密度[g/m^3]
+  const double E = 1.0e08;                                     // ヤング率(0.1MPa)[g/m/s^2]
+  const double A0 = PI * pow(9.0e-03, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）[m^2]
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
@@ -78,6 +79,7 @@ int main()
 
   using namespace Eigen;
 
+  // [時刻][node番号]
   std::vector<std::vector<double>>
       flowQuantity(M + 1, std::vector<double>(NODE_NUM, 0.0));
   std::vector<std::vector<double>> area(M + 1, std::vector<double>(NODE_NUM, 0.0));
