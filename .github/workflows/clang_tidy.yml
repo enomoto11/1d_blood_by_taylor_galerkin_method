@@ -10,11 +10,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install LLVM (includes Clang-Tidy)
-        run: |
-          brew update
-          brew install llvm
-          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
+      - name: Check Clang-Tidy version
+        run: clang-tidy --version
 
       - name: Run Clang-Tidy
         run: |
