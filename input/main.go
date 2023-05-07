@@ -18,7 +18,11 @@ func outputElement_d() {
 	defer file.Close()
 
 	for i := 0; i < ElementD; i++ {
-		fmt.Fprintf(file, "%d %d\n", i, i+1)
+		if i == ElementD-1 {
+			fmt.Fprintf(file, "%d %d", i, i+1)
+		} else {
+			fmt.Fprintf(file, "%d %d\n", i, i+1)
+		}
 	}
 }
 
@@ -33,7 +37,12 @@ func outputNode_d() {
 	for i := 0; i <= ElementD; i++ {
 		var x float32
 		x = float32(i) / float32(ElementD)
-		fmt.Fprintf(file, "%.2f %d %d\n", x, 0, 0)
+
+		if i == ElementD {
+			fmt.Fprintf(file, "%.2f %d %d", x, 0, 0)
+		} else {
+			fmt.Fprintf(file, "%.2f %d %d\n", x, 0, 0)
+		}
 	}
 }
 
