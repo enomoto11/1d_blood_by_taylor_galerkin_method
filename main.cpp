@@ -38,16 +38,15 @@ int main()
   int NODE_NUM = Countnumofline("input/node_d.dat");
   int ELEMENT_NUM = Countnumofline("input/element_d.dat");
 
-  int M = 1200;             // 時間ステップ数
-  double dt = 1.0e-03;      // 時間刻み
-  double DELTA_X = 1.0e-02; // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
-  const double PI = acos(-1);
-  const double h0 = 1.0e-03;  // 初期状態のtubeの厚さ
-  const double K_R = 1.0e-04; // K_R
-  const double rho = 1.0e-03; // 密度
-  const double E = 1.0e5;     // ヤング率(0.1MPa)
-
-  const double A0 = PI * (9.0e-03) * (9.0e-03);                // 初期状態のtubeの流路面積（位置座標によらない）
+  const int M = 1200;                                          // 時間ステップ数
+  const double dt = 1.0e-03;                                   // 時間刻み
+  const double DELTA_X = 1.0e-02;                              // 要素の長さ（tube全体を1mとした時に100分割したものを想定）
+  const double PI = M_PI;                                      // 円周率
+  const double h0 = 1.0e-03;                                   // 初期状態のtubeの厚さ
+  const double K_R = 1.0e-04;                                  // K_R
+  const double rho = 1.0e-03;                                  // 密度
+  const double E = 1.0e5;                                      // ヤング率(0.1MPa)
+  const double A0 = PI * pow(9.0e-03, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
