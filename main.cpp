@@ -54,18 +54,18 @@ int main()
 
   double v0 = 1.0e-2; // 所定位置における初期状態のtubeの流速[m/s]
 
-  std::vector<std::vector<double>> node(NODE_NUM, std::vector<double>(3, 0));
-  std::ifstream ifs("input/node_d.dat"); // ファイル入力
-  for (int i = 0; i < NODE_NUM; i++)
-  {
-    std::vector<double> node_t(3, 0);
-    for (int j = 0; j < 3; j++)
-    {
-      ifs >> node_t[j];
-    }
-    node[i] = node_t;
-  }
-  ifs.close();
+  // std::vector<std::vector<double>> node(NODE_NUM, std::vector<double>(3, 0));
+  // std::ifstream ifs("input/node_d.dat"); // ファイル入力
+  // for (int i = 0; i < NODE_NUM; i++)
+  // {
+  //   std::vector<double> node_t(3, 0);
+  //   for (int j = 0; j < 3; j++)
+  //   {
+  //     ifs >> node_t[j];
+  //   }
+  //   node[i] = node_t;
+  // }
+  // ifs.close();
 
   std::vector<std::vector<double>> element(ELEMENT_NUM, std::vector<double>(3, 0));
   std::fstream ifs1("input/element_d.dat"); // ファイル入力
@@ -177,46 +177,48 @@ int main()
 
     // TODO: debugを関数化したい
     // --------------------------------------------------------------------debug
-    // b_areaの出力
-    std::ostringstream oss_b_area;
-    oss_b_area << "debug/b/area/debug" << i << ".csv";
-    std::ofstream outputfile_b_area(oss_b_area.str());
-    for (int j = 0; j < ELEMENT_NUM + 1; j++)
+    if ((i >= 0 && i < 10) || (i % 50 == 0))
     {
-      outputfile_b_area << b_area(j) << std::endl;
-    }
-    outputfile_b_area.close();
+      // b_areaの出力
+      std::ostringstream oss_b_area;
+      oss_b_area << "debug/b/area/debug" << i << ".csv";
+      std::ofstream outputfile_b_area(oss_b_area.str());
+      for (int j = 0; j < ELEMENT_NUM + 1; j++)
+      {
+        outputfile_b_area << b_area(j) << std::endl;
+      }
+      outputfile_b_area.close();
 
-    // b_flowQuantityの出力
-    std::ostringstream oss_b_flowQuantity;
-    oss_b_flowQuantity << "debug/b/flowQuantity/debug" << i << ".csv";
-    std::ofstream outputfile_b_flowQuantity(oss_b_flowQuantity.str());
-    for (int j = 0; j < ELEMENT_NUM + 1; j++)
-    {
-      outputfile_b_flowQuantity << b_flowQuantity(j) << std::endl;
-    }
-    outputfile_b_flowQuantity.close();
+      // b_flowQuantityの出力
+      std::ostringstream oss_b_flowQuantity;
+      oss_b_flowQuantity << "debug/b/flowQuantity/debug" << i << ".csv";
+      std::ofstream outputfile_b_flowQuantity(oss_b_flowQuantity.str());
+      for (int j = 0; j < ELEMENT_NUM + 1; j++)
+      {
+        outputfile_b_flowQuantity << b_flowQuantity(j) << std::endl;
+      }
+      outputfile_b_flowQuantity.close();
 
-    // x_areaの出力
-    std::ostringstream oss_x_area;
-    oss_x_area << "debug/x/area/debug" << i << ".csv";
-    std::ofstream ofs_x_area(oss_x_area.str());
-    for (int k = 0; k < x_area.size(); k++)
-    {
-      ofs_x_area << x_area(k) << std::endl;
-    }
-    ofs_x_area.close();
+      // x_areaの出力
+      std::ostringstream oss_x_area;
+      oss_x_area << "debug/x/area/debug" << i << ".csv";
+      std::ofstream ofs_x_area(oss_x_area.str());
+      for (int k = 0; k < x_area.size(); k++)
+      {
+        ofs_x_area << x_area(k) << std::endl;
+      }
+      ofs_x_area.close();
 
-    // x_flowQuantityの出力
-    std::ostringstream oss_x_flowQuantity;
-    oss_x_flowQuantity << "debug/x/flowQuantity/debug" << i << ".csv";
-    std::ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
-    for (int k = 0; k < x_flowQuantity.size(); k++)
-    {
-      ofs_x_flowQuantity << x_flowQuantity(k) << std::endl;
+      // x_flowQuantityの出力
+      std::ostringstream oss_x_flowQuantity;
+      oss_x_flowQuantity << "debug/x/flowQuantity/debug" << i << ".csv";
+      std::ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
+      for (int k = 0; k < x_flowQuantity.size(); k++)
+      {
+        ofs_x_flowQuantity << x_flowQuantity(k) << std::endl;
+      }
+      ofs_x_flowQuantity.close();
     }
-    ofs_x_flowQuantity.close();
-
     // --------------------------------------------------------------------debug
   }
 
