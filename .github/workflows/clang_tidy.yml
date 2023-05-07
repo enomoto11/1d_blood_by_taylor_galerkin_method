@@ -1,0 +1,24 @@
+name: Clang-Tidy
+
+on: [push]
+
+jobs:
+  clang_tidy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install LLVM (includes Clang-Tidy)
+        run: |
+          brew update
+          brew install llvm
+          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
+
+      - name: Run Clang-Tidy
+        run: |
+          find . -type f -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-tidy -checks=* -header-filter=.* -p . {} \; 2>&1 | tee tidy_result.txt
+          if grep -q "warning:" tidy_result.txt || grep -q "error:" tidy_result.txt; then
+            exit 1
+          fi
