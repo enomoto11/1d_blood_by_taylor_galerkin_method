@@ -201,9 +201,9 @@ int main()
     std::ostringstream oss_x_area;
     oss_x_area << "debug/x/area/debug" << i << ".csv";
     std::ofstream ofs_x_area(oss_x_area.str());
-    for (int i = 0; i < x_area.size(); i++)
+    for (int k = 0; k < x_area.size(); k++)
     {
-      ofs_x_area << x_area(i) << std::endl;
+      ofs_x_area << x_area(k) << std::endl;
     }
     ofs_x_area.close();
 
@@ -211,9 +211,9 @@ int main()
     std::ostringstream oss_x_flowQuantity;
     oss_x_flowQuantity << "debug/x/flowQuantity/debug" << i << ".csv";
     std::ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
-    for (int i = 0; i < x_flowQuantity.size(); i++)
+    for (int k = 0; k < x_flowQuantity.size(); k++)
     {
-      ofs_x_flowQuantity << x_flowQuantity(i) << std::endl;
+      ofs_x_flowQuantity << x_flowQuantity(k) << std::endl;
     }
     ofs_x_flowQuantity.close();
 
