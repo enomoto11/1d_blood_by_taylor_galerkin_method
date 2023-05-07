@@ -52,7 +52,7 @@ int main()
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
-  double v0 = 1.0e-2; // 所定位置における初期状態のtubeの流速[m/s]
+  double v0 = 1.0e-02; // 所定位置における初期状態のtubeの流速[m/s]
 
   // std::vector<std::vector<double>> node(NODE_NUM, std::vector<double>(3, 0));
   // std::ifstream ifs("input/node_d.dat"); // ファイル入力
