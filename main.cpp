@@ -52,20 +52,7 @@ int main()
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
 
-  double v0 = 1.0e-02; // 所定位置における初期状態のtubeの流速[m/s]
-
-  // std::vector<std::vector<double>> node(NODE_NUM, std::vector<double>(3, 0));
-  // std::ifstream ifs("input/node_d.dat"); // ファイル入力
-  // for (int i = 0; i < NODE_NUM; i++)
-  // {
-  //   std::vector<double> node_t(3, 0);
-  //   for (int j = 0; j < 3; j++)
-  //   {
-  //     ifs >> node_t[j];
-  //   }
-  //   node[i] = node_t;
-  // }
-  // ifs.close();
+  double v0 = 1.0e-03; // 所定位置における初期状態のtubeの流速[m/s]
 
   std::vector<std::vector<double>> element(ELEMENT_NUM, std::vector<double>(3, 0));
   std::fstream ifs1("input/element_d.dat"); // ファイル入力
@@ -108,20 +95,32 @@ int main()
     Eigen::MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
     Eigen::VectorXd b_flowQuantity = VectorXd::Zero(NODE_NUM);
 
+    const double INITIAL_VALUE = 0.0;
+    for (int j = 0; j < NODE_NUM; j++)
+    {
+      for (int k = 0; k < NODE_NUM; k++)
+      {
+        A_area(j, k) = INITIAL_VALUE;
+        A_flowQuantity(j, k) = INITIAL_VALUE;
+      }
+      b_area(j) = INITIAL_VALUE;
+      b_flowQuantity(j) = INITIAL_VALUE;
+    }
+
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
       int ele0 = element[j][0];
       int ele1 = element[j][1];
 
-      A_area(ele0, ele0) = A_area(ele0, ele0) + 2.0e0 * DELTA_X / (dt * 6.0e0);
-      A_area(ele0, ele1) = A_area(ele0, ele1) + 1.0e0 * DELTA_X / (dt * 6.0e0);
-      A_area(ele1, ele0) = A_area(ele1, ele0) + 1.0e0 * DELTA_X / (dt * 6.0e0);
-      A_area(ele1, ele1) = A_area(ele1, ele1) + 2.0e0 * DELTA_X / (dt * 6.0e0);
+      A_area(ele0, ele0) += 2.0e0 * DELTA_X / (dt * 6.0e0);
+      A_area(ele0, ele1) += 1.0e0 * DELTA_X / (dt * 6.0e0);
+      A_area(ele1, ele0) += 1.0e0 * DELTA_X / (dt * 6.0e0);
+      A_area(ele1, ele1) += 2.0e0 * DELTA_X / (dt * 6.0e0);
 
-      A_flowQuantity(ele0, ele0) = A_flowQuantity(ele0, ele0) + 2.0e0 * DELTA_X / (dt * 6.0e0);
-      A_flowQuantity(ele0, ele1) = A_flowQuantity(ele0, ele1) + 1.0e0 * DELTA_X / (dt * 6.0e0);
-      A_flowQuantity(ele1, ele0) = A_flowQuantity(ele1, ele0) + 1.0e0 * DELTA_X / (dt * 6.0e0);
-      A_flowQuantity(ele1, ele1) = A_flowQuantity(ele1, ele1) + 2.0e0 * DELTA_X / (dt * 6.0e0);
+      A_flowQuantity(ele0, ele0) += 2.0e0 * DELTA_X / (dt * 6.0e0);
+      A_flowQuantity(ele0, ele1) += 1.0e0 * DELTA_X / (dt * 6.0e0);
+      A_flowQuantity(ele1, ele0) += 1.0e0 * DELTA_X / (dt * 6.0e0);
+      A_flowQuantity(ele1, ele1) += 2.0e0 * DELTA_X / (dt * 6.0e0);
     }
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
@@ -131,10 +130,10 @@ int main()
       double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
       // calculate first term in right side
-      b_area(ele0) = b_area(ele0) + DELTA_X / 6.0e0 * (2.0e0 * area1 + 1.0e0 * area2);
-      b_area(ele1) = b_area(ele1) + DELTA_X / 6.0e0 * (1.0e0 * area1 + 2.0e0 * area2);
-      b_flowQuantity(ele0) = b_flowQuantity(ele0) + DELTA_X / 6.0e0 * (2.0e0 * flowQuantity1 + 1.0e0 * flowQuantity2);
-      b_flowQuantity(ele1) = b_flowQuantity(ele1) + DELTA_X / 6.0e0 * (1.0e0 * flowQuantity1 + 2.0e0 * flowQuantity2);
+      b_area(ele0) = DELTA_X / 6.0e0 * (2.0e0 * area1 + 1.0e0 * area2);
+      b_area(ele1) = DELTA_X / 6.0e0 * (1.0e0 * area1 + 2.0e0 * area2);
+      b_flowQuantity(ele0) = DELTA_X / 6.0e0 * (2.0e0 * flowQuantity1 + 1.0e0 * flowQuantity2);
+      b_flowQuantity(ele1) = DELTA_X / 6.0e0 * (1.0e0 * flowQuantity1 + 2.0e0 * flowQuantity2);
 
       // calculate second term in right side
       b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
@@ -143,24 +142,19 @@ int main()
       b_flowQuantity(ele1) = b_flowQuantity(ele1) + dt * ((pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (pow(area1, 1.5e0) - pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (pow(flowQuantity1 / area1, 2.0e0) - pow(flowQuantity2 / area2, 2.0e0)));
 
       // calculate third term in right side
+      // b_area has no third term
+      // b_flowQuantity(ele0) = b_flowQuantity(ele0) - pow(dt, 2.0e0) / 2.0e0 * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X)) + K_R * DELTA_X / 6.0e0 * (2.0e0 * (1.0e0 / area1 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1) + 1.0e0 * (1.0e0 / area2 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1)))) + betha * K_R / 2.0e0 / rho * DELTA_X / 6.0e0 * (2.0e0 * pow(area1, -5.0e-01) * (area2 - area1) / DELTA_X + 1.0e0 * pow(area2, -5.0e-01) * (area2 - area1) / DELTA_X));
+      // b_flowQuantity(ele1) = b_flowQuantity(ele1) - pow(dt, 2.0e0) / 2.0e0 * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X)) + K_R * DELTA_X / 6.0e0 * (1.0e0 * (1.0e0 / area1 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1) + 2.0e0 * (1.0e0 / area2 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1)))) + betha * K_R / 2.0e0 / rho * DELTA_X / 6.0e0 * (1.0e0 * pow(area1, -5.0e-01) * (area2 - area1) / DELTA_X + 2.0e0 * pow(area2, -5.0e-01) * (area2 - area1) / DELTA_X));
 
       // calculate fourth term in right side
+      // b_area(ele0) = b_area(ele0) - pow(dt, 2.0e0) / 2.0e0 * (1.0e0 / DELTA_X * (pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) + betha / 4.0e0 / rho * (pow(area1, 5.0e-01) * (area2 - area1) / DELTA_X - pow(area2, 5.0e-01) * (area2 - area1) / DELTA_X));
+      // b_area(ele1) = b_area(ele1) - pow(dt, 2.0e0) / 2.0e0 * (1.0e0 / DELTA_X * (-pow(flowQuantity1, 2.0e0) / area1 + pow(flowQuantity2, 2.0e0) / area2) + betha / 4.0e0 / rho * (-pow(area1, 5.0e-01) * (area2 - area1) / DELTA_X + pow(area2, 5.0e-01) * (area2 - area1) / DELTA_X));
 
       // calculate fifth term in right side
       // b_area has no fifth term
       b_flowQuantity(ele0) = b_flowQuantity(ele0) - dt * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / area1) + 1.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
       b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
     }
-
-    // for (int j = 0; j < ELEMENT_NUM + 1; j++)
-    // {
-    //   A_area(0, j) = 0.0e0;
-    //   A_flowQuantity(0, j) = 0.0e0;
-    // }
-    // A_area(0, 0) = 1.0e0;
-    // A_flowQuantity(0, 0) = 1.0e0;
-    // b_area(0) = 0.0e0;
-    // b_flowQuantity(0) = 0.0e0;
 
     // 行列計算
     Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
