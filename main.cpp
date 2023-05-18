@@ -22,16 +22,16 @@
 
 #include <cstdio>
 #include <iomanip>
-#include <bits/stdc++.h>
 
 using namespace std;
+using namespace Eigen;
 
-int Countnumofline(std::string file)
+int Countnumofline(string file)
 {
-  std::ifstream ifs(file); // ファイルオープン
-  int numofnode = 0;       // 行の数を数える定数
-  std::string str;         // 文字列指定
-  while (std::getline(ifs, str))
+  ifstream ifs(file); // ファイルオープン
+  int numofnode = 0;  // 行の数を数える定数
+  string str;         // 文字列指定
+  while (getline(ifs, str))
   {
     numofnode++;
   }
@@ -62,13 +62,11 @@ int main()
 
   double v0 = 1.0e-03; // 所定位置における初期状態のtubeの流速[m/s]
 
-
-
-  std::vector<std::vector<double>> element(ELEMENT_NUM, std::vector<double>(3, 0));
-  std::fstream ifs1("input/element_d.dat"); // ファイル入力
+  vector<vector<double>> element(ELEMENT_NUM, vector<double>(3, 0));
+  fstream ifs1("input/element_d.dat"); // ファイル入力
   for (int i = 0; i < ELEMENT_NUM; i++)
   {
-    std::vector<double> element_t(2, 0);
+    vector<double> element_t(2, 0);
     for (int j = 0; j < 2; j++)
     {
       ifs1 >> element_t[j];
@@ -77,30 +75,28 @@ int main()
   }
   ifs1.close();
 
-
   string str;
   ifstream ifs2("input/node_d.dat");
-    vector<double> x;
-    while(getline(ifs,str)){
-        istringstream ss(str); 
-        string tmp;
-        vector<double> tmp_x;
-        for(int j=0; j<1; j++){
-            getline(ss, tmp, ' ');
-            tmp_x.push_back(stod(tmp));
-        }
-        x.push_back(tmp_x);
+  vector<double> x;
+  while (getline(ifs2, str))
+  {
+    istringstream ss(str);
+    string tmp;
+    vector<double> tmp_x;
+    for (int j = 0; j < 1; j++)
+    {
+      getline(ss, tmp, ' ');
+      tmp_x.push_back(stod(tmp));
     }
+    x.push_back(tmp_x[0]);
+  }
   ifs2.close();
 
-
-  using namespace Eigen;
-
   // [時刻][node番号]
-  std::vector<std::vector<double>>
-      flowQuantity(M + 1, std::vector<double>(NODE_NUM, 0.0));
-  std::vector<std::vector<double>> area(M + 1, std::vector<double>(NODE_NUM, 0.0));
-  std::vector<std::vector<double>> velocity(M + 1, std::vector<double>(NODE_NUM, 0.0));
+  vector<vector<double>>
+      flowQuantity(M + 1, vector<double>(NODE_NUM, 0.0));
+  vector<vector<double>> area(M + 1, vector<double>(NODE_NUM, 0.0));
+  vector<vector<double>> velocity(M + 1, vector<double>(NODE_NUM, 0.0));
 
   // init Q and A (which we want to calculate)
   for (int i = 0; i < NODE_NUM; i++)
@@ -167,61 +163,89 @@ int main()
       b_area(ele1) = b_area(ele1) + dt * (flowQuantity1 - flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * ((flowQuantity1 / area1) - (flowQuantity2 / area2) / 2.0e0);
       b_flowQuantity(ele0) = b_flowQuantity(ele0) + dt * ((-(pow(flowQuantity1, 2.0e0) / area1) + pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (-pow(area1, 1.5e0) + pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)) + pow(flowQuantity2 / area2, 2.0e0)));
       b_flowQuantity(ele1) = b_flowQuantity(ele1) + dt * ((pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (pow(area1, 1.5e0) - pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (pow(flowQuantity1 / area1, 2.0e0) - pow(flowQuantity2 / area2, 2.0e0)));
-       
-
-      // calculate third term in right side
-      // b_area has no third term
-      // b_flowQuantity(ele0) = b_flowQuantity(ele0) - pow(dt, 2.0e0) / 2.0e0 * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X)) + K_R * DELTA_X / 6.0e0 * (2.0e0 * (1.0e0 / area1 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1) + 1.0e0 * (1.0e0 / area2 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1)))) + betha * K_R / 2.0e0 / rho * DELTA_X / 6.0e0 * (2.0e0 * pow(area1, -5.0e-01) * (area2 - area1) / DELTA_X + 1.0e0 * pow(area2, -5.0e-01) * (area2 - area1) / DELTA_X));
-      // b_flowQuantity(ele1) = b_flowQuantity(ele1) - pow(dt, 2.0e0) / 2.0e0 * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0) * (flowQuantity2 - flowQuantity1) / DELTA_X)) + K_R * DELTA_X / 6.0e0 * (1.0e0 * (1.0e0 / area1 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1) + 2.0e0 * (1.0e0 / area2 / DELTA_X * (pow(flowQuantity2, 2.0e0) / area2 - pow(flowQuantity1, 2.0e0) / area1)))) + betha * K_R / 2.0e0 / rho * DELTA_X / 6.0e0 * (1.0e0 * pow(area1, -5.0e-01) * (area2 - area1) / DELTA_X + 2.0e0 * pow(area2, -5.0e-01) * (area2 - area1) / DELTA_X));
 
       Gauss g(1);
-      
-      //第3項のガウス積分
-      for(int i=0; i<2 i++){
+
+      // calculate third term in right side
+      for (int i = 0; i < 2; i++)
+      {
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
-        vector<double> dNdx(2,0e0);
+        vector<double> dNdx(2, 0e0);
+        vector<double> dNinvdr(2, 0e0);
         vector<double> dNinvdx(2, 0e0);
 
         shape.P2_N(N, g.point[i]);
         shape.P2_dNdr(dNdr, g.point[i]);
         shape.P2_dNinvdr(dNinvdr, g.point[i]);
 
-        
-        double dxdr = dNdr.at(0)*x.at(ele0) + dNdr.at(1)*x.at(ele1);
-        double drdx = 1e0/dxdr;
-        
-        dNdx.at(0) =  dNdr.at(0) * drdx;
+        double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+        double drdx = 1e0 / dxdr;
+
+        dNdx.at(0) = dNdr.at(0) * drdx;
         dNdx.at(1) = dNdr.at(1) * drdx;
 
-        dNinvdx.at(0) =  dNinvdr.at(0) * drdx;
+        dNinvdx.at(0) = dNinvdr.at(0) * drdx;
         dNinvdx.at(1) = dNinvdr.at(1) * drdx;
 
-        double Q = N.at(0)* flowQuantity[i][ele0] + N.at(1)*flowQuantity[i][elm1];
-        double A = N.at(0)* flowQuantity[i][ele0] + N.at(1)*flowQuantity[i][elm1];
-        double dQdx = dNdx.at(0) * flowQuantity[i][ele0] +  dNdx.at(1) *flowQuantity[i][elm1];
-        double dAdx = dNdx.at(0) * area[i][ele0] +  dNdx.at(1) *area[i][elm1];
-        double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][elm1];
+        double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+        double A = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+        double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
+        double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
+        double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
 
-        //合成関数の微分
-        double dQQAdx =  dAinvdx*Q*Q + (1/A)*dQdx*Q + (1/A)*Q*dQdx  
-        
-        //ガウス点でたし合わせる
-        b_area(ele0) += - N.at(0) * dt*dt / 2.0e0 * ( K_R * Q/(A*A) * dQdx + (K_R/A) * dQQAdx +  (betha * K_R / (2e0 * rho) ) * pow(A, -5e-1) * dAdx ) * g.weight[i];
-        b_area(ele1) += - N.at(1) * dt*dt / 2.0e0 * ( K_R * Q/(A*A) * dQdx + (K_R/A) * dQQAdx +  (betha * K_R / (2e0 * rho) ) * pow(A, -5e-1) * dAdx ) * g.weight[i];
+        // 合成関数の微分
+        double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
+
+        // ガウス点でたし合わせる
+        // b_area has no third term
+        b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+        b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
       }
 
-
       // calculate fourth term in right side
-      // b_area(ele0) = b_area(ele0) - pow(dt, 2.0e0) / 2.0e0 * (1.0e0 / DELTA_X * (pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) + betha / 4.0e0 / rho * (pow(area1, 5.0e-01) * (area2 - area1) / DELTA_X - pow(area2, 5.0e-01) * (area2 - area1) / DELTA_X));
-      // b_area(ele1) = b_area(ele1) - pow(dt, 2.0e0) / 2.0e0 * (1.0e0 / DELTA_X * (-pow(flowQuantity1, 2.0e0) / area1 + pow(flowQuantity2, 2.0e0) / area2) + betha / 4.0e0 / rho * (-pow(area1, 5.0e-01) * (area2 - area1) / DELTA_X + pow(area2, 5.0e-01) * (area2 - area1) / DELTA_X));
+      for (int i = 0; i < 2; i++)
+      {
+        vector<double> N(2, 0e0);
+        vector<double> dNdr(2, 0e0);
+        vector<double> dNdx(2, 0e0);
+        vector<double> dNinvdr(2, 0e0);
+        vector<double> dNinvdx(2, 0e0);
+
+        shape.P2_N(N, g.point[i]);
+        shape.P2_dNdr(dNdr, g.point[i]);
+        shape.P2_dNinvdr(dNinvdr, g.point[i]);
+
+        double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+        double drdx = 1e0 / dxdr;
+
+        dNdx.at(0) = dNdr.at(0) * drdx;
+        dNdx.at(1) = dNdr.at(1) * drdx;
+
+        dNinvdx.at(0) = dNinvdr.at(0) * drdx;
+        dNinvdx.at(1) = dNinvdr.at(1) * drdx;
+
+        double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+        double A = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+        double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
+        double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
+        double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
+
+        // 合成関数の微分
+        double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
+
+        // ガウス点でたし合わせる
+        b_area(ele0) += -N.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+        b_area(ele1) += -N.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+
+        b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
+        b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
+      }
 
       // calculate fifth term in right side
       // b_area has no fifth term
       b_flowQuantity(ele0) = b_flowQuantity(ele0) - dt * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / area1) + 1.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
       b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
-      
-      
     }
 
     // 行列計算
@@ -242,42 +266,42 @@ int main()
     if (i < 10 || i % 50 == 0)
     {
       // b_areaの出力
-      std::ostringstream oss_b_area;
+      ostringstream oss_b_area;
       oss_b_area << "debug/b/area/debug" << i << ".csv";
-      std::ofstream outputfile_b_area(oss_b_area.str());
+      ofstream outputfile_b_area(oss_b_area.str());
       for (int j = 0; j < ELEMENT_NUM + 1; j++)
       {
-        outputfile_b_area << b_area(j) << std::endl;
+        outputfile_b_area << b_area(j) << endl;
       }
       outputfile_b_area.close();
 
       // b_flowQuantityの出力
-      std::ostringstream oss_b_flowQuantity;
+      ostringstream oss_b_flowQuantity;
       oss_b_flowQuantity << "debug/b/flowQuantity/debug" << i << ".csv";
-      std::ofstream outputfile_b_flowQuantity(oss_b_flowQuantity.str());
+      ofstream outputfile_b_flowQuantity(oss_b_flowQuantity.str());
       for (int j = 0; j < ELEMENT_NUM + 1; j++)
       {
-        outputfile_b_flowQuantity << b_flowQuantity(j) << std::endl;
+        outputfile_b_flowQuantity << b_flowQuantity(j) << endl;
       }
       outputfile_b_flowQuantity.close();
 
       // x_areaの出力
-      std::ostringstream oss_x_area;
+      ostringstream oss_x_area;
       oss_x_area << "debug/x/area/debug" << i << ".csv";
-      std::ofstream ofs_x_area(oss_x_area.str());
+      ofstream ofs_x_area(oss_x_area.str());
       for (int k = 0; k < x_area.size(); k++)
       {
-        ofs_x_area << x_area(k) << std::endl;
+        ofs_x_area << x_area(k) << endl;
       }
       ofs_x_area.close();
 
       // x_flowQuantityの出力
-      std::ostringstream oss_x_flowQuantity;
+      ostringstream oss_x_flowQuantity;
       oss_x_flowQuantity << "debug/x/flowQuantity/debug" << i << ".csv";
-      std::ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
+      ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
       for (int k = 0; k < x_flowQuantity.size(); k++)
       {
-        ofs_x_flowQuantity << x_flowQuantity(k) << std::endl;
+        ofs_x_flowQuantity << x_flowQuantity(k) << endl;
       }
       ofs_x_flowQuantity.close();
     }
@@ -286,25 +310,25 @@ int main()
 
   int d = 100;
   // 見たい時刻t=0~200
-  std::ofstream ofs("output/flowQuantity.dat");
+  ofstream ofs("output/flowQuantity.dat");
   for (int i = 0; i < 7; i++)
   {
     for (int j = 0; j < d + 1; j++)
     {
       ofs << flowQuantity[i * 200][j] << " ";
     }
-    ofs << std::endl;
+    ofs << endl;
   }
   ofs.close();
 
-  std::ofstream ofs2("output/area.dat");
+  ofstream ofs2("output/area.dat");
   for (int i = 0; i < 7; i++)
   {
     for (int j = 0; j < d + 1; j++)
     {
       ofs2 << area[i * 200][j] << " ";
     }
-    ofs2 << std::endl;
+    ofs2 << endl;
   }
 
   return 0;
