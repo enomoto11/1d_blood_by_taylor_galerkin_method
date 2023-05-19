@@ -46,21 +46,20 @@ int main()
 
   ShapeFunction1D shape;
 
-  const double L = 1.0e-02;                                    // tubeの長さ[m]
+  const double L = 1.0e0;                                      // tubeの長さ[m]
   const int M = 1200;                                          // 時間ステップ数[-]
   const double dt = 1.0e-03;                                   // 時間刻み[s]
   const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
   const double PI = M_PI;                                      // 円周率
-  const double r0 = 1.0e-05;                                   // 初期状態のtubeの半径[m]
-  const double h0 = 1.0e-06;                                   // 初期状態のtubeの厚さ[m]
+  const double r0 = 1.0e-03;                                   // 初期状態のtubeの半径[m]
+  const double h0 = 1.0e-04;                                   // 初期状態のtubeの厚さ[m]
   const double A0 = PI * pow(r0 - h0, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）[m^2]
   const double K_R = 3.3e-06;                                  // 粘性抵抗K_R[m^2/s]
   const double rho = 1060000.0;                                // 密度[g/m^3]
   const double E = 1.0e08;                                     // ヤング率(0.1MPa)[g/m/s^2]
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   // const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
-
-  double v0 = 1.0e-03; // 所定位置における初期状態のtubeの流速[m/s]
+  double v0 = 1.0e0; // 所定位置における初期状態のtubeの流速[m/s]
 
   vector<vector<double>> element(ELEMENT_NUM, vector<double>(3, 0));
   fstream ifs1("input/element_d.dat"); // ファイル入力
@@ -103,22 +102,22 @@ int main()
   {
     area[0][i] = A0;
     // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i >= 0 && i <= NODE_NUM / 2)
-    {
-      velocity[0][i] = v0;
-    }
+    // if (i >= 0 && i <= NODE_NUM / 2)
+    // {
+    velocity[0][i] = v0;
+    // }
     flowQuantity[0][i] = area[0][i] * velocity[0][i];
   }
 
   // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
   {
-    Eigen::MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
-    Eigen::VectorXd b_area = VectorXd::Zero(NODE_NUM);
-    Eigen::MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
-    Eigen::VectorXd b_flowQuantity = VectorXd::Zero(NODE_NUM);
+    MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
+    VectorXd b_area = VectorXd::Zero(NODE_NUM);
+    MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
+    VectorXd b_flowQuantity = VectorXd::Zero(NODE_NUM);
 
-    const double INITIAL_VALUE = 0.0;
+    const double INITIAL_VALUE = 0e0;
     for (int j = 0; j < NODE_NUM; j++)
     {
       for (int k = 0; k < NODE_NUM; k++)
@@ -147,16 +146,20 @@ int main()
     }
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
+      // B.C. : 0番目のnode点では常に流路面積,速度一定
+      area[i][0] = A0;
+      flowQuantity[i][0] = A0 * v0;
+
       int ele0 = element[j][0];
       int ele1 = element[j][1];
       double area1 = area[i][ele0], area2 = area[i][ele1];
       double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
       // calculate first term in right side
-      b_area(ele0) = DELTA_X / 6.0e0 * (2.0e0 * area1 + 1.0e0 * area2);
-      b_area(ele1) = DELTA_X / 6.0e0 * (1.0e0 * area1 + 2.0e0 * area2);
-      b_flowQuantity(ele0) = DELTA_X / 6.0e0 * (2.0e0 * flowQuantity1 + 1.0e0 * flowQuantity2);
-      b_flowQuantity(ele1) = DELTA_X / 6.0e0 * (1.0e0 * flowQuantity1 + 2.0e0 * flowQuantity2);
+      b_area(ele0) += DELTA_X / 6.0e0 * (2.0e0 * area1 + 1.0e0 * area2);
+      b_area(ele1) += DELTA_X / 6.0e0 * (1.0e0 * area1 + 2.0e0 * area2);
+      b_flowQuantity(ele0) += DELTA_X / 6.0e0 * (2.0e0 * flowQuantity1 + 1.0e0 * flowQuantity2);
+      b_flowQuantity(ele1) += DELTA_X / 6.0e0 * (1.0e0 * flowQuantity1 + 2.0e0 * flowQuantity2);
 
       // calculate second term in right side
       b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
@@ -235,11 +238,11 @@ int main()
         double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
         // ガウス点でたし合わせる
-        b_area(ele0) += -N.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
-        b_area(ele1) += -N.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+        b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+        b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
 
-        b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
-        b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
+        b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
+        b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[i];
       }
 
       // calculate fifth term in right side
@@ -248,16 +251,23 @@ int main()
       b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
     }
 
+    // for (int j = 0; j < NODE_NUM; j++)
+    // {
+    //   A_area(0, j) = 0.0e0;
+    //   A_flowQuantity(0, j) = 0e0;
+    // }
+    // A_area(0, 0) = 1.0e0;
+    // A_flowQuantity(0, 0) = 1.0e0;
+    // b_area(0) = 0.0e0;
+    // b_flowQuantity(0) = 0.0e0;
+
     // 行列計算
     Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
     Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
 
-    for (int j = 0; j < x_area.size(); j++)
+    for (int j = 0; j < NODE_NUM; j++)
     {
       area[i + 1][j] = x_area(j);
-    }
-    for (int j = 0; j < x_flowQuantity.size(); j++)
-    {
       flowQuantity[i + 1][j] = x_flowQuantity(j);
     }
 
@@ -311,7 +321,7 @@ int main()
   int d = 100;
   // 見たい時刻t=0~200
   ofstream ofs("output/flowQuantity.dat");
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < 6; i++)
   {
     for (int j = 0; j < d + 1; j++)
     {
@@ -322,7 +332,7 @@ int main()
   ofs.close();
 
   ofstream ofs2("output/area.dat");
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < 6; i++)
   {
     for (int j = 0; j < d + 1; j++)
     {
