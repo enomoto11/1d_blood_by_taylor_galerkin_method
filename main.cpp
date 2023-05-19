@@ -14,8 +14,8 @@
 #include <math.h>
 #include <cmath>
 
-#include "lib/eigen/Eigen/Core"
-#include "lib/eigen/Eigen/LU"
+#include "lib/Eigen/Core"
+#include "lib/Eigen/LU"
 
 #include "shapefunction.h"
 #include "gauss.h"
@@ -101,6 +101,7 @@ int main()
   for (int i = 0; i < NODE_NUM; i++)
   {
     area[0][i] = A0;
+    //cout << "area[0][i] = " << area[0][i] << endl;
     // 初期状態のnodeに与える速度はノード点の位置によって変える
     // if (i >= 0 && i <= NODE_NUM / 2)
     // {
@@ -108,10 +109,13 @@ int main()
     // }
     flowQuantity[0][i] = area[0][i] * velocity[0][i];
   }
+  int loop = 0;
 
   // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
   {
+    cout << " loop = " << loop << endl;
+    loop++;
     MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
     VectorXd b_area = VectorXd::Zero(NODE_NUM);
     MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
@@ -129,6 +133,7 @@ int main()
       b_flowQuantity(j) = INITIAL_VALUE;
     }
 
+
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
       int ele0 = element[j][0];
@@ -143,6 +148,14 @@ int main()
       A_flowQuantity(ele0, ele1) += 1.0e0 * DELTA_X / (dt * 6.0e0);
       A_flowQuantity(ele1, ele0) += 1.0e0 * DELTA_X / (dt * 6.0e0);
       A_flowQuantity(ele1, ele1) += 2.0e0 * DELTA_X / (dt * 6.0e0);
+
+      if(isnan(A_area(ele0, ele0))){
+        cout << "A_area(ele0, ele0) is nan Exit..." << endl;
+        exit(1);
+      }else if(isnan(A_area(ele0, ele1))){
+        cout << "A_area(ele0, ele1) is nan Exit..." << endl;
+        exit(1);
+      }
     }
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
@@ -155,22 +168,48 @@ int main()
       double area1 = area[i][ele0], area2 = area[i][ele1];
       double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
+      //cout << "ele0 = " << ele0 << " ele1 = " << ele1 << " area1 = " << area1 << " flowQuantity1 = " << flowQuantity1 << endl;
+
       // calculate first term in right side
       b_area(ele0) += DELTA_X / 6.0e0 * (2.0e0 * area1 + 1.0e0 * area2);
       b_area(ele1) += DELTA_X / 6.0e0 * (1.0e0 * area1 + 2.0e0 * area2);
       b_flowQuantity(ele0) += DELTA_X / 6.0e0 * (2.0e0 * flowQuantity1 + 1.0e0 * flowQuantity2);
       b_flowQuantity(ele1) += DELTA_X / 6.0e0 * (1.0e0 * flowQuantity1 + 2.0e0 * flowQuantity2);
 
+      cout << "DELTA_X = " << DELTA_X << endl;
+      cout << b_area(ele0) << " " << b_area(ele1) << " " << b_flowQuantity(ele0) << " " << b_flowQuantity(ele1) << endl;
+      if(isnan(b_area(ele0)) || isnan(b_area(ele1)) || isnan(b_flowQuantity(ele0)) || isnan(b_flowQuantity(ele1))){
+        cout << "first term is nan Exit..." << endl;
+        exit(1);
+      }
+      /*
+      cout << " dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)))= " <<  dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)))<< endl;
+      cout << "-(pow(flowQuantity1, 2.0e0) / area1) = " << -(pow(flowQuantity1, 2.0e0) / area1) << endl;
+      cout << "pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 = " << pow(flowQuantity2, 2.0e0) / area2 / 2.0e0 << endl;
+      cout << "betha / rho / 3.0e0 / 2.0e0 * (-pow(area1, 1.5e0) + pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)) = " <<  (pow(area2, 1.5e0)) << endl;
+      cout << "b_flowQuantity(ele0) = " << b_flowQuantity(ele0) << endl;
+      cout << "-(pow(flowQuantity1, 2.0e0) / area1) = " << -(pow(flowQuantity1, 2.0e0) / area1) << endl;
+      cout << "area2 = " << area2 << endl;
+      */
       // calculate second term in right side
       b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
       b_area(ele1) = b_area(ele1) + dt * (flowQuantity1 - flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * ((flowQuantity1 / area1) - (flowQuantity2 / area2) / 2.0e0);
       b_flowQuantity(ele0) = b_flowQuantity(ele0) + dt * ((-(pow(flowQuantity1, 2.0e0) / area1) + pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (-pow(area1, 1.5e0) + pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)) + pow(flowQuantity2 / area2, 2.0e0)));
       b_flowQuantity(ele1) = b_flowQuantity(ele1) + dt * ((pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (pow(area1, 1.5e0) - pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (pow(flowQuantity1 / area1, 2.0e0) - pow(flowQuantity2 / area2, 2.0e0)));
+      if(isnan(b_area(ele1))){
+        cout << "b_area(ele0)is nan Exit..." << endl;
+        exit(1);
+      }
+      if(isnan(b_area(ele0)) || isnan(b_area(ele1)) || isnan(b_flowQuantity(ele0)) || isnan(b_flowQuantity(ele1))){
+        cout << "second term is nan Exit..." << endl;
+        exit(1);
+      }
+      cout << "1" << endl;
 
       Gauss g(1);
 
       // calculate third term in right side
-      for (int i = 0; i < 2; i++)
+      for (int k = 0; k <2; k++)
       {
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
@@ -178,12 +217,14 @@ int main()
         vector<double> dNinvdr(2, 0e0);
         vector<double> dNinvdx(2, 0e0);
 
-        shape.P2_N(N, g.point[i]);
-        shape.P2_dNdr(dNdr, g.point[i]);
-        shape.P2_dNinvdr(dNinvdr, g.point[i]);
-
+        shape.P2_N(N, g.point[k]);
+        shape.P2_dNdr(dNdr, g.point[k]);
+        shape.P2_dNinvdr(dNinvdr, g.point[k]);
+        //cout << "dNinvdr.at(0) = " << dNinvdr.at(0) <<  "dNinvdr.at(1) = " << dNinvdr.at(1) << endl;
+ 
         double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
         double drdx = 1e0 / dxdr;
+        //cout << "drdx = " << drdx << endl;
 
         dNdx.at(0) = dNdr.at(0) * drdx;
         dNdx.at(1) = dNdr.at(1) * drdx;
@@ -197,6 +238,10 @@ int main()
         double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
         double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
 
+        //cout << "area[i][ele0] = " << area[i][ele0] << " area[i][ele1] = " << area[i][ele1] << endl;
+
+        //cout << "A = " << A << " Q = " << Q << " dQdx = " << dQdx << "dAivdx = " << dAinvdx << endl;
+
         // 合成関数の微分
         double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
@@ -204,10 +249,16 @@ int main()
         // b_area has no third term
         b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
         b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[i];
+        if(isnan(b_flowQuantity(ele0)) || isnan(b_flowQuantity(ele1))){
+          cout << "third term is nan Exit..." << endl;
+          exit(1);
+        }
       }
+      cout << "2" << endl;
+  
 
       // calculate fourth term in right side
-      for (int i = 0; i < 2; i++)
+      for (int k=0; k<2; k++)
       {
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
@@ -215,9 +266,9 @@ int main()
         vector<double> dNinvdr(2, 0e0);
         vector<double> dNinvdx(2, 0e0);
 
-        shape.P2_N(N, g.point[i]);
-        shape.P2_dNdr(dNdr, g.point[i]);
-        shape.P2_dNinvdr(dNinvdr, g.point[i]);
+        shape.P2_N(N, g.point[k]);
+        shape.P2_dNdr(dNdr, g.point[k]);
+        shape.P2_dNinvdr(dNinvdr, g.point[k]);
 
         double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
         double drdx = 1e0 / dxdr;
@@ -249,7 +300,14 @@ int main()
       // b_area has no fifth term
       b_flowQuantity(ele0) = b_flowQuantity(ele0) - dt * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / area1) + 1.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
       b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
+
+      if(isnan(isnan(b_area(ele0)) || isnan(b_area(ele1)) || isnan(b_flowQuantity(ele0))) || isnan(b_flowQuantity(ele1))){
+        cout << "forth term is nan Exit..." << endl;
+        exit(1);
+      }
     }
+
+  
 
     // for (int j = 0; j < NODE_NUM; j++)
     // {
