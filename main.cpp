@@ -13,15 +13,12 @@
 #include <vector>
 #include <math.h>
 #include <cmath>
-
 #include "lib/eigen/Eigen/Core"
 #include "lib/eigen/Eigen/LU"
-
 #include "shapefunction.h"
 #include "gauss.h"
 #include "flag.h"
 #include "params.h"
-
 #include <cstdio>
 #include <iomanip>
 
