@@ -40,7 +40,7 @@ void initValues()
   }
 }
 
-int exec(LeftPartFlag flag)
+void exec(LeftPartFlag flag)
 {
   ShapeFunction1D shape;
   initValues();
@@ -289,8 +289,6 @@ int exec(LeftPartFlag flag)
     }
     ofs2 << endl;
   }
-
-  return 0;
 }
 
 void arrest()
