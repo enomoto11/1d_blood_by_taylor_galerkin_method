@@ -65,7 +65,6 @@ void output()
 void exec(LeftPartFlag flag)
 {
   ShapeFunction1D shape;
-  initVariables();
 
   // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
@@ -288,8 +287,6 @@ void exec(LeftPartFlag flag)
     }
     // --------------------------------------------------------------------debug
   }
-
-  output();
 }
 
 void arrest()
@@ -327,9 +324,14 @@ int main()
 {
   arrest();
 
+  initVariables();
+
   LeftPartFlag lpf;
   lpf.shouldCalculateSecondTerm = false;
   lpf.shouldCalculateFourthTerm = false;
   lpf.shouldCalculateFifthTerm = false;
+
   exec(lpf);
+
+  output();
 }
