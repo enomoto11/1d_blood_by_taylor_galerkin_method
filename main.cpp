@@ -26,7 +26,7 @@ using namespace std;
 using namespace Eigen;
 
 // init Q and A (which we want to calculate)
-void initValues()
+void initVariables()
 {
   for (int i = 0; i < NODE_NUM; i++)
   {
@@ -37,10 +37,35 @@ void initValues()
   }
 }
 
+void output()
+{
+  int d = 100;
+  ofstream ofs("output/dat/flowQuantity.dat");
+  for (int i = 0; i < 6; i++)
+  {
+    for (int j = 0; j < d + 1; j++)
+    {
+      ofs << flowQuantity[i * 100][j] << " ";
+    }
+    ofs << endl;
+  }
+  ofs.close();
+
+  ofstream ofs2("output/dat/area.dat");
+  for (int i = 0; i < 6; i++)
+  {
+    for (int j = 0; j < d + 1; j++)
+    {
+      ofs2 << area[i * 100][j] << " ";
+    }
+    ofs2 << endl;
+  }
+}
+
 void exec(LeftPartFlag flag)
 {
   ShapeFunction1D shape;
-  initValues();
+  initVariables();
 
   // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
@@ -208,7 +233,6 @@ void exec(LeftPartFlag flag)
       }
     }
 
-    // 行列計算
     Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
     Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
 
@@ -265,27 +289,7 @@ void exec(LeftPartFlag flag)
     // --------------------------------------------------------------------debug
   }
 
-  int d = 100;
-  ofstream ofs("output/dat/flowQuantity.dat");
-  for (int i = 0; i < 6; i++)
-  {
-    for (int j = 0; j < d + 1; j++)
-    {
-      ofs << flowQuantity[i * 100][j] << " ";
-    }
-    ofs << endl;
-  }
-  ofs.close();
-
-  ofstream ofs2("output/dat/area.dat");
-  for (int i = 0; i < 6; i++)
-  {
-    for (int j = 0; j < d + 1; j++)
-    {
-      ofs2 << area[i * 100][j] << " ";
-    }
-    ofs2 << endl;
-  }
+  output();
 }
 
 void arrest()
