@@ -4,3 +4,13 @@
 
 を編集する
   - TODO : これらのリソースを1元化する
+
+# 計算の実行
+```shell
+make
+```
+
+# 可視化
+```shell
+python3 visualize.py
+```
