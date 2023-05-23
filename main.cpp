@@ -87,7 +87,7 @@ int exec(LeftPartFlag flag)
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
       Gauss g(1);
-      // B.C. : 0番目のnode点では常に流路面積,速度一定
+      // B.C. : 0番目のnode点では常に流路面積, 速度一定
       area[i][0] = A0;
       flowQuantity[i][0] = A0 * v0;
 
@@ -269,7 +269,7 @@ int exec(LeftPartFlag flag)
   }
 
   int d = 100;
-  ofstream ofs("output/flowQuantity.dat");
+  ofstream ofs("output/dat/flowQuantity.dat");
   for (int i = 0; i < 6; i++)
   {
     for (int j = 0; j < d + 1; j++)
@@ -280,7 +280,7 @@ int exec(LeftPartFlag flag)
   }
   ofs.close();
 
-  ofstream ofs2("output/area.dat");
+  ofstream ofs2("output/dat/area.dat");
   for (int i = 0; i < 6; i++)
   {
     for (int j = 0; j < d + 1; j++)
