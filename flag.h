@@ -1,8 +1,8 @@
 struct LeftPartFlag
 {
-  bool isFirstTerm = true;
-  bool isSecondTerm = true;
-  bool isThirdTerm = true;
-  bool isFourthTerm = true;
-  bool isFifthTerm = true;
+  bool shouldCalculateFirstTerm = true;
+  bool shouldCalculateSecondTerm = true;
+  bool shouldCalculateThirdTerm = true;
+  bool shouldCalculateFourthTerm = true;
+  bool shouldCalculateFifthTerm = true;
 };

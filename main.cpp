@@ -123,7 +123,7 @@ int exec(LeftPartFlag flag)
       double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
       // calculate first term in right side
-      if (flag.isFirstTerm)
+      if (flag.shouldCalculateFirstTerm)
       {
         for (int k = 0; k < 2; k++)
         {
@@ -150,7 +150,7 @@ int exec(LeftPartFlag flag)
       }
 
       // calculate second term in right side
-      if (flag.isSecondTerm)
+      if (flag.shouldCalculateSecondTerm)
       {
         b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
         b_area(ele1) = b_area(ele1) + dt * (flowQuantity1 - flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * ((flowQuantity1 / area1) - (flowQuantity2 / area2) / 2.0e0);
@@ -159,7 +159,7 @@ int exec(LeftPartFlag flag)
       }
 
       // calculate third term in right side
-      if (flag.isThirdTerm)
+      if (flag.shouldCalculateThirdTerm)
       {
         for (int k = 0; k < 2; k++)
         {
@@ -196,7 +196,7 @@ int exec(LeftPartFlag flag)
       }
 
       // calculate fourth term in right side
-      if (flag.isFourthTerm)
+      if (flag.shouldCalculateFourthTerm)
       {
         for (int k = 0; k < 2; k++)
         {
@@ -234,7 +234,7 @@ int exec(LeftPartFlag flag)
       }
 
       // calculate fifth term in right side
-      if (flag.isFifthTerm)
+      if (flag.shouldCalculateFifthTerm)
       {
         // b_area has no fifth term
         b_flowQuantity(ele0) = b_flowQuantity(ele0) - dt * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / area1) + 1.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
@@ -327,9 +327,9 @@ int exec(LeftPartFlag flag)
 int main()
 {
   LeftPartFlag lpf;
-  lpf.isSecondTerm = false;
-  lpf.isFourthTerm = false;
-  lpf.isFifthTerm = false;
+  lpf.shouldCalculateSecondTerm = false;
+  lpf.shouldCalculateFourthTerm = false;
+  lpf.shouldCalculateFifthTerm = false;
 
   exec(lpf);
 }
