@@ -4,6 +4,9 @@
 int ELEMENT_NUM = 100;
 int NODE_NUM = ELEMENT_NUM + 1;
 
+vector<vector<double>> element(ELEMENT_NUM, vector<double>(3, 0));
+vector<double> x;
+
 const double L = 1.0e0;                                      // tubeの長さ[m]
 const int M = 1200;                                          // 時間ステップ数[-]
 const double dt = 1.0e-03;                                   // 時間刻み[s]

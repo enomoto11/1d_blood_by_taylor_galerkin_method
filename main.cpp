@@ -28,41 +28,9 @@
 using namespace std;
 using namespace Eigen;
 
-int exec(LeftPartFlag flag)
+// init Q and A (which we want to calculate)
+void initValues()
 {
-  ShapeFunction1D shape;
-
-  vector<vector<double>> element(ELEMENT_NUM, vector<double>(3, 0));
-  fstream ifs1("input/element_d.dat"); // ファイル入力
-  for (int i = 0; i < ELEMENT_NUM; i++)
-  {
-    vector<double> element_t(2, 0);
-    for (int j = 0; j < 2; j++)
-    {
-      ifs1 >> element_t[j];
-    }
-    element[i] = element_t;
-  }
-  ifs1.close();
-
-  string str;
-  ifstream ifs2("input/node_d.dat");
-  vector<double> x;
-  while (getline(ifs2, str))
-  {
-    istringstream ss(str);
-    string tmp;
-    vector<double> tmp_x;
-    for (int j = 0; j < 1; j++)
-    {
-      getline(ss, tmp, ' ');
-      tmp_x.push_back(stod(tmp));
-    }
-    x.push_back(tmp_x[0]);
-  }
-  ifs2.close();
-
-  // init Q and A (which we want to calculate)
   for (int i = 0; i < NODE_NUM; i++)
   {
     // 初期状態のnodeに与える速度はノード点の位置によって変える
@@ -70,6 +38,12 @@ int exec(LeftPartFlag flag)
     velocity[0][i] = v0;
     flowQuantity[0][i] = area[0][i] * velocity[0][i];
   }
+}
+
+int exec(LeftPartFlag flag)
+{
+  ShapeFunction1D shape;
+  initValues();
 
   // 時間ステップごとに計算
   for (int i = 0; i < M; i++)
@@ -319,12 +293,44 @@ int exec(LeftPartFlag flag)
   return 0;
 }
 
+void arrest()
+{
+  fstream ifs1("input/element_d.dat"); // ファイル入力
+  for (int i = 0; i < ELEMENT_NUM; i++)
+  {
+    vector<double> element_t(2, 0);
+    for (int j = 0; j < 2; j++)
+    {
+      ifs1 >> element_t[j];
+    }
+    element[i] = element_t;
+  }
+  ifs1.close();
+
+  string str;
+  ifstream ifs2("input/node_d.dat");
+  while (getline(ifs2, str))
+  {
+    istringstream ss(str);
+    string tmp;
+    vector<double> tmp_x;
+    for (int j = 0; j < 1; j++)
+    {
+      getline(ss, tmp, ' ');
+      tmp_x.push_back(stod(tmp));
+    }
+    x.push_back(tmp_x[0]);
+  }
+  ifs2.close();
+}
+
 int main()
 {
+  arrest();
+
   LeftPartFlag lpf;
   lpf.shouldCalculateSecondTerm = false;
   lpf.shouldCalculateFourthTerm = false;
   lpf.shouldCalculateFifthTerm = false;
-
   exec(lpf);
 }
