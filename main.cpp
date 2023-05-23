@@ -122,7 +122,6 @@ int exec(LeftPartFlag flag)
       double area1 = area[i][ele0], area2 = area[i][ele1];
       double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
-      // calculate first term in right side
       if (flag.shouldCalculateFirstTerm)
       {
         for (int k = 0; k < 2; k++)
@@ -149,7 +148,6 @@ int exec(LeftPartFlag flag)
         }
       }
 
-      // calculate second term in right side
       if (flag.shouldCalculateSecondTerm)
       {
         b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
@@ -158,7 +156,6 @@ int exec(LeftPartFlag flag)
         b_flowQuantity(ele1) = b_flowQuantity(ele1) + dt * ((pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (pow(area1, 1.5e0) - pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (pow(flowQuantity1 / area1, 2.0e0) - pow(flowQuantity2 / area2, 2.0e0)));
       }
 
-      // calculate third term in right side
       if (flag.shouldCalculateThirdTerm)
       {
         for (int k = 0; k < 2; k++)
@@ -195,7 +192,6 @@ int exec(LeftPartFlag flag)
         }
       }
 
-      // calculate fourth term in right side
       if (flag.shouldCalculateFourthTerm)
       {
         for (int k = 0; k < 2; k++)
@@ -233,7 +229,6 @@ int exec(LeftPartFlag flag)
         }
       }
 
-      // calculate fifth term in right side
       if (flag.shouldCalculateFifthTerm)
       {
         // b_area has no fifth term
