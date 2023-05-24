@@ -31,35 +31,44 @@ void initVariables()
   for (int i = 0; i < NODE_NUM; i++)
   {
     // 初期状態のnodeに与える速度はノード点の位置によって変える
-    area[0][i] = A0;
-    velocity[0][i] = v0;
-    flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    if (i < 30)
+    {
+      area[0][i] = A0;
+      velocity[0][i] = v0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
+    else
+    {
+      area[0][i] = A0 / 1.5e0;
+      velocity[0][i] = 0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
   }
 }
 
 void output()
 {
-  int d = 100;
   ofstream ofs("output/dat/flowQuantity.dat");
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 12; i++)
   {
-    for (int j = 0; j < d + 1; j++)
+    for (int j = 0; j < NODE_NUM; j++)
     {
-      ofs << flowQuantity[i * 100][j] << " ";
+      ofs << flowQuantity[i * 50][j] << " ";
     }
     ofs << endl;
   }
   ofs.close();
 
   ofstream ofs2("output/dat/area.dat");
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 12; i++)
   {
-    for (int j = 0; j < d + 1; j++)
+    for (int j = 0; j < NODE_NUM; j++)
     {
-      ofs2 << area[i * 100][j] << " ";
+      ofs2 << area[i * 50][j] << " ";
     }
     ofs2 << endl;
   }
+  ofs2.close();
 }
 
 void exec(LeftPartFlag flag)
