@@ -19,7 +19,6 @@
 #include <iomanip>
 #include "shapefunction.h"
 #include "gauss.h"
-#include "flag.h"
 #include "params.h"
 #include "left-part.h"
 #include "exception-args.h"
@@ -82,6 +81,12 @@ void initVariables()
 
 void output()
 {
+  int iteratedTime;
+
+  fstream ifsIteratedTime("output/dat/iteratedTime.dat");
+  ifsIteratedTime >> iteratedTime;
+  ifsIteratedTime.close();
+
   ofstream ofs("output/dat/flowQuantity.dat");
   for (int i = 0; i < 12; i++)
   {

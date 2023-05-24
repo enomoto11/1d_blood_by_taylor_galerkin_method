@@ -1,6 +1,3 @@
-#include <iostream>
-#include "exception-args.h"
-
 class ExceptionManager
 {
 public:

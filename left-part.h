@@ -1,8 +1,4 @@
 #include "flag.h"
-#include <cstdio>
-#include <iostream>
-#include <vector>
-
 struct LeftPart
 {
   Flag firstTerm;
