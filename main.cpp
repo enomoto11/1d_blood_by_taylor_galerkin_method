@@ -119,6 +119,8 @@ void exec(LeftPartFlag flag)
 
       int ele0 = element[j][0];
       int ele1 = element[j][1];
+      double flow0 = flowQuantity[i][ele0], flow1 = flowQuantity[i][ele1];
+      double area0 = area[i][ele0], area1 = area[i][ele1];
 
       if (flag.shouldCalculateFirstTerm)
       {
@@ -132,8 +134,8 @@ void exec(LeftPartFlag flag)
 
           double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
 
-          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
+          double Q = N.at(0) * flow0 + N.at(1) * flow1;
+          double A = N.at(0) * area0 + N.at(1) * area1;
 
           b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
@@ -159,8 +161,8 @@ void exec(LeftPartFlag flag)
           dNdx.at(0) = dNdr.at(0) * drdx;
           dNdx.at(1) = dNdr.at(1) * drdx;
 
-          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
+          double Q = N.at(0) * flow0 + N.at(1) * flow1;
+          double A = N.at(0) * area0 + N.at(1) * area1;
 
           b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
@@ -192,11 +194,11 @@ void exec(LeftPartFlag flag)
           dNinvdx.at(0) = dNinvdr.at(0) * drdx;
           dNinvdx.at(1) = dNinvdr.at(1) * drdx;
 
-          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
-          double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
-          double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
-          double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
+          double Q = N.at(0) * flow0 + N.at(1) * flow1;
+          double A = N.at(0) * area0 + N.at(1) * area1;
+          double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
+          double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
+          double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
           double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
           // b_area has no third term
@@ -228,11 +230,11 @@ void exec(LeftPartFlag flag)
           dNinvdx.at(0) = dNinvdr.at(0) * drdx;
           dNinvdx.at(1) = dNinvdr.at(1) * drdx;
 
-          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
-          double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
-          double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
-          double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
+          double Q = N.at(0) * flow0 + N.at(1) * flow1;
+          double A = N.at(0) * area0 + N.at(1) * area1;
+          double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
+          double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
+          double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
           double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
           b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
@@ -254,8 +256,8 @@ void exec(LeftPartFlag flag)
 
           double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
 
-          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
+          double Q = N.at(0) * flow0 + N.at(1) * flow1;
+          double A = N.at(0) * area0 + N.at(1) * area1;
 
           // b_area has no fifth term
           b_flowQuantity(ele0) += -N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
