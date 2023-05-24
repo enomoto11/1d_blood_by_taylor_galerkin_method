@@ -29,7 +29,7 @@ for j in range(ITERATED_TIME):
     plt.plot(length, flowQuantities[j])
 
 plt.xlabel("Length[m]")
-plt.ylabel("f")
+plt.ylabel("Quantity[m^3/s]")
 
 # Legend
 plt.legend(

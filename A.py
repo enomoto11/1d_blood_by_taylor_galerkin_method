@@ -31,7 +31,7 @@ for i in range(ITERATED_TIME):
 
 
 plt.xlabel("Length[m]")
-plt.ylabel("f")
+plt.ylabel("Area[m^2]")
 
 # Legend
 plt.legend(
