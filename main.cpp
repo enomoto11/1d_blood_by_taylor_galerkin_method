@@ -31,7 +31,7 @@ void initVariables()
   for (int i = 0; i < NODE_NUM; i++)
   {
     // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i < 30)
+    if (i < 40)
     {
       area[0][i] = A0;
       velocity[0][i] = v0;
@@ -40,7 +40,7 @@ void initVariables()
     else
     {
       area[0][i] = A0 / 1.5e0;
-      velocity[0][i] = 0;
+      velocity[0][i] = v0 * 1.5e0;
       flowQuantity[0][i] = area[0][i] * velocity[0][i];
     }
   }
@@ -148,6 +148,8 @@ void exec(LeftPartFlag flag)
       {
         for (int k = 0; k < 2; k++)
         {
+          Gauss g(1);
+
           vector<double> N(2, 0e0);
           vector<double> dNdr(2, 0e0);
           vector<double> dNdx(2, 0e0);
@@ -168,6 +170,23 @@ void exec(LeftPartFlag flag)
           b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += dNdx.at(0) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += dNdx.at(1) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
+
+          cout << "j = " << j << endl;
+          cout << "j*(i+1) = " << j * (i + 1) << endl;
+          cout << "Q = " << Q << endl;
+          cout << "A = " << A << endl;
+          cout << "b_area(ele0) = " << b_area(ele0) << endl;
+          cout << "b_area(ele1) = " << b_area(ele1) << endl;
+          cout << "b_flowQuantity(ele0) = " << b_flowQuantity(ele0) << endl;
+          cout << "b_flowQuantity(ele1) = " << b_flowQuantity(ele1) << endl;
+          cout << "(Q + dt / 2e0 * (-K_R * Q / A) = " << Q + dt / 2e0 * (-K_R * Q / A) << endl;
+          cout << "(Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A) = " << Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A) << endl;
+
+          if (isnan(b_area(ele0)) || isnan(b_area(ele1)) || isnan(b_flowQuantity(ele0)) || isnan(b_flowQuantity(ele1)) || Q < 0e0 || A < 0e0)
+          {
+            cout << "second term is nan Exit..." << endl;
+            exit(1);
+          }
         }
       }
 
@@ -175,6 +194,8 @@ void exec(LeftPartFlag flag)
       {
         for (int k = 0; k < 2; k++)
         {
+          Gauss g(1);
+
           vector<double> N(2, 0e0);
           vector<double> dNdr(2, 0e0);
           vector<double> dNdx(2, 0e0);
@@ -211,6 +232,8 @@ void exec(LeftPartFlag flag)
       {
         for (int k = 0; k < 2; k++)
         {
+          Gauss g(1);
+
           vector<double> N(2, 0e0);
           vector<double> dNdr(2, 0e0);
           vector<double> dNdx(2, 0e0);
@@ -248,6 +271,8 @@ void exec(LeftPartFlag flag)
       {
         for (int k = 0; k < 2; k++)
         {
+          Gauss g(1);
+
           vector<double> N(2, 0e0);
           vector<double> dNdr(2, 0e0);
 
