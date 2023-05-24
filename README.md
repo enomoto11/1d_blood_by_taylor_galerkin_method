@@ -5,7 +5,10 @@
 を編集する
   - TODO : これらのリソースを1元化する
 
-# 計算の実行
+# 出力する波形の時間経過を変えたい時
+- [output.dat](output/dat/iteratedTime.dat)の整数を変更する
+
+# 計算の実行（可視化まで行う）
 ```shell
 make
 ```
