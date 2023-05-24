@@ -114,8 +114,6 @@ void exec(LeftPartFlag flag)
 
       int ele0 = element[j][0];
       int ele1 = element[j][1];
-      double area1 = area[i][ele0], area2 = area[i][ele1];
-      double flowQuantity1 = flowQuantity[i][ele0], flowQuantity2 = flowQuantity[i][ele1];
 
       if (flag.shouldCalculateFirstTerm)
       {
@@ -145,10 +143,29 @@ void exec(LeftPartFlag flag)
 
       if (flag.shouldCalculateSecondTerm)
       {
-        b_area(ele0) = b_area(ele0) + dt * (-flowQuantity1 + flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * (-(flowQuantity1 / area1) + (flowQuantity2 / area2) / 2.0e0);
-        b_area(ele1) = b_area(ele1) + dt * (flowQuantity1 - flowQuantity2) / 2.0e0 - dt / 2.0e0 * K_R * ((flowQuantity1 / area1) - (flowQuantity2 / area2) / 2.0e0);
-        b_flowQuantity(ele0) = b_flowQuantity(ele0) + dt * ((-(pow(flowQuantity1, 2.0e0) / area1) + pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (-pow(area1, 1.5e0) + pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (-(pow(flowQuantity1 / area1, 2.0e0)) + pow(flowQuantity2 / area2, 2.0e0)));
-        b_flowQuantity(ele1) = b_flowQuantity(ele1) + dt * ((pow(flowQuantity1, 2.0e0) / area1 - pow(flowQuantity2, 2.0e0) / area2) / 2.0e0 + betha / rho / 3.0e0 / 2.0e0 * (pow(area1, 1.5e0) - pow(area2, 1.5e0)) - dt * K_R / 2.0e0 * (pow(flowQuantity1 / area1, 2.0e0) - pow(flowQuantity2 / area2, 2.0e0)));
+        for (int k = 0; k < 2; k++)
+        {
+          vector<double> N(2, 0e0);
+          vector<double> dNdr(2, 0e0);
+          vector<double> dNdx(2, 0e0);
+
+          shape.P2_N(N, g.point[k]);
+          shape.P2_dNdr(dNdr, g.point[k]);
+
+          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+          double drdx = 1e0 / dxdr;
+
+          dNdx.at(0) = dNdr.at(0) * drdx;
+          dNdx.at(1) = dNdr.at(1) * drdx;
+
+          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
+
+          b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
+          b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
+          b_flowQuantity(ele0) += dNdx.at(0) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
+          b_flowQuantity(ele1) += dNdx.at(1) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
+        }
       }
 
       if (flag.shouldCalculateThirdTerm)
