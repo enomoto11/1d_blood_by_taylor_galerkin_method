@@ -134,7 +134,7 @@ void exec(LeftPartFlag flag)
           double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
 
           double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
 
           b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
@@ -175,7 +175,7 @@ void exec(LeftPartFlag flag)
           dNinvdx.at(1) = dNinvdr.at(1) * drdx;
 
           double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
           double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
           double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
           double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
@@ -211,7 +211,7 @@ void exec(LeftPartFlag flag)
           dNinvdx.at(1) = dNinvdr.at(1) * drdx;
 
           double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
-          double A = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
           double dQdx = dNdx.at(0) * flowQuantity[i][ele0] + dNdx.at(1) * flowQuantity[i][ele1];
           double dAdx = dNdx.at(0) * area[i][ele0] + dNdx.at(1) * area[i][ele1];
           double dAinvdx = dNinvdx.at(0) / area[i][ele0] + dNinvdx.at(1) / area[i][ele1];
@@ -226,9 +226,23 @@ void exec(LeftPartFlag flag)
 
       if (flag.shouldCalculateFifthTerm)
       {
-        // b_area has no fifth term
-        b_flowQuantity(ele0) = b_flowQuantity(ele0) - dt * (K_R * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / area1) + 1.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (2.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 1.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
-        b_flowQuantity(ele1) = b_flowQuantity(ele1) - dt * (K_R * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / area1) + 2.0e0 * (flowQuantity2 / area2)) + dt / 2.0e0 * pow(K_R, 2.0e0) * DELTA_X / 6.0e0 * (1.0e0 * (flowQuantity1 / pow(area1, 2.0e0)) + 2.0e0 * (flowQuantity2 / pow(area2, 2.0e0))));
+        for (int k = 0; k < 2; k++)
+        {
+          vector<double> N(2, 0e0);
+          vector<double> dNdr(2, 0e0);
+
+          shape.P2_N(N, g.point[k]);
+          shape.P2_dNdr(dNdr, g.point[k]);
+
+          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+
+          double Q = N.at(0) * flowQuantity[i][ele0] + N.at(1) * flowQuantity[i][ele1];
+          double A = N.at(0) * area[i][ele0] + N.at(1) * area[i][ele1];
+
+          // b_area has no fifth term
+          b_flowQuantity(ele0) += -N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+          b_flowQuantity(ele1) += -N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+        }
       }
     }
 
@@ -329,7 +343,6 @@ int main()
   LeftPartFlag lpf;
   lpf.shouldCalculateSecondTerm = false;
   lpf.shouldCalculateFourthTerm = false;
-  lpf.shouldCalculateFifthTerm = false;
 
   exec(lpf);
 

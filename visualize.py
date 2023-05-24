@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-areas = np.loadtxt("output/area.dat", dtype=float)
-flowQuantities = np.loadtxt("output/flowQuantity.dat", dtype=float)
+areas = np.loadtxt("output/dat/area.dat", dtype=float)
+flowQuantities = np.loadtxt("output/dat/flowQuantity.dat", dtype=float)
 ITERATED_TIME = 6
 
 length = []
