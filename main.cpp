@@ -15,12 +15,15 @@
 #include <cmath>
 #include "lib/eigen/Eigen/Core"
 #include "lib/eigen/Eigen/LU"
+#include <cstdio>
+#include <iomanip>
 #include "shapefunction.h"
 #include "gauss.h"
 #include "flag.h"
 #include "params.h"
-#include <cstdio>
-#include <iomanip>
+#include "left-part.h"
+#include "exception-args.h"
+#include "exception-manager.h"
 
 using namespace std;
 using namespace Eigen;
@@ -196,7 +199,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.firstTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.firstTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -209,7 +212,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.secondTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.secondTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -220,7 +223,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.thirdTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.thirdTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -233,7 +236,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fourthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fourthTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -244,7 +247,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fifthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fifthTerm.index);
             ExceptionManager::check(args);
           }
         }
