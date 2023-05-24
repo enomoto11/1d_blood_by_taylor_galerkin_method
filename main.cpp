@@ -27,7 +27,7 @@
 using namespace std;
 using namespace Eigen;
 
-void arrest()
+void input()
 {
   fstream ifs1("input/element_d.dat");
   for (int i = 0; i < ELEMENT_NUM; i++)
@@ -272,7 +272,7 @@ void exec()
 
 int main()
 {
-  arrest();
+  input();
 
   initVariables();
 
