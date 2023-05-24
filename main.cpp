@@ -93,13 +93,9 @@ void exec(LeftPartFlag flag)
       {
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
-        vector<double> dNdx(2, 0e0);
-        vector<double> dNinvdr(2, 0e0);
-        vector<double> dNinvdx(2, 0e0);
 
         shape.P2_N(N, g.point[k]);
         shape.P2_dNdr(dNdr, g.point[k]);
-        shape.P2_dNinvdr(dNinvdr, g.point[k]);
 
         double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
 
@@ -130,13 +126,9 @@ void exec(LeftPartFlag flag)
         {
           vector<double> N(2, 0e0);
           vector<double> dNdr(2, 0e0);
-          vector<double> dNdx(2, 0e0);
-          vector<double> dNinvdr(2, 0e0);
-          vector<double> dNinvdx(2, 0e0);
 
           shape.P2_N(N, g.point[k]);
           shape.P2_dNdr(dNdr, g.point[k]);
-          shape.P2_dNinvdr(dNinvdr, g.point[k]);
 
           double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
 
