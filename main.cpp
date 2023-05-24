@@ -62,7 +62,7 @@ void initVariables()
   for (int i = 0; i < NODE_NUM; i++)
   {
     // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i < 40)
+    if (i < 60)
     {
       area[0][i] = A0;
       velocity[0][i] = v0;
@@ -189,6 +189,14 @@ void exec(LeftPartFlag flag)
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += N.at(0) * Q * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += N.at(1) * Q * g.weight[k] * dxdr;
+
+          if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
+          {
+            cout << "i = " << i << endl;
+            cout << "j = " << j << endl;
+            cout << "first term is nan Exit..." << endl;
+            exit(1);
+          }
         }
         if (flag.shouldCalculateSecondTerm)
         {
@@ -197,19 +205,10 @@ void exec(LeftPartFlag flag)
           b_flowQuantity(ele0) += dNdx.at(0) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += dNdx.at(1) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
 
-          cout << "j = " << j << endl;
-          cout << "j*(i+1) = " << j * (i + 1) << endl;
-          cout << "Q = " << Q << endl;
-          cout << "A = " << A << endl;
-          cout << "b_area(ele0) = " << b_area(ele0) << endl;
-          cout << "b_area(ele1) = " << b_area(ele1) << endl;
-          cout << "b_flowQuantity(ele0) = " << b_flowQuantity(ele0) << endl;
-          cout << "b_flowQuantity(ele1) = " << b_flowQuantity(ele1) << endl;
-          cout << "(Q + dt / 2e0 * (-K_R * Q / A) = " << Q + dt / 2e0 * (-K_R * Q / A) << endl;
-          cout << "(Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A) = " << Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A) << endl;
-
-          if (isnan(b_area(ele0)) || isnan(b_area(ele1)) || isnan(b_flowQuantity(ele0)) || isnan(b_flowQuantity(ele1)) || Q < 0e0 || A < 0e0)
+          if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
+            cout << "i = " << i << endl;
+            cout << "j = " << j << endl;
             cout << "second term is nan Exit..." << endl;
             exit(1);
           }
@@ -218,6 +217,14 @@ void exec(LeftPartFlag flag)
         { // b_area has no third term
           b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
+
+          if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
+          {
+            cout << "i = " << i << endl;
+            cout << "j = " << j << endl;
+            cout << "third term is nan Exit..." << endl;
+            exit(1);
+          }
         }
         if (flag.shouldCalculateFourthTerm)
         {
@@ -225,11 +232,27 @@ void exec(LeftPartFlag flag)
           b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
+
+          if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
+          {
+            cout << "i = " << i << endl;
+            cout << "j = " << j << endl;
+            cout << "fourth term is nan Exit..." << endl;
+            exit(1);
+          }
         }
         if (flag.shouldCalculateFifthTerm)
         { // b_area has no fifth term
           b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+
+          if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
+          {
+            cout << "i = " << i << endl;
+            cout << "j = " << j << endl;
+            cout << "fifth term is nan Exit..." << endl;
+            exit(1);
+          }
         }
       }
     }
@@ -242,52 +265,6 @@ void exec(LeftPartFlag flag)
       area[i + 1][j] = x_area(j);
       flowQuantity[i + 1][j] = x_flowQuantity(j);
     }
-
-    // TODO: debugを関数化したい
-    // --------------------------------------------------------------------debug
-    if (i < 10 || i % 50 == 0)
-    {
-      // b_areaの出力
-      ostringstream oss_b_area;
-      oss_b_area << "debug/b/area/debug" << i << ".csv";
-      ofstream outputfile_b_area(oss_b_area.str());
-      for (int j = 0; j < ELEMENT_NUM + 1; j++)
-      {
-        outputfile_b_area << b_area(j) << endl;
-      }
-      outputfile_b_area.close();
-
-      // b_flowQuantityの出力
-      ostringstream oss_b_flowQuantity;
-      oss_b_flowQuantity << "debug/b/flowQuantity/debug" << i << ".csv";
-      ofstream outputfile_b_flowQuantity(oss_b_flowQuantity.str());
-      for (int j = 0; j < ELEMENT_NUM + 1; j++)
-      {
-        outputfile_b_flowQuantity << b_flowQuantity(j) << endl;
-      }
-      outputfile_b_flowQuantity.close();
-
-      // x_areaの出力
-      ostringstream oss_x_area;
-      oss_x_area << "debug/x/area/debug" << i << ".csv";
-      ofstream ofs_x_area(oss_x_area.str());
-      for (int k = 0; k < x_area.size(); k++)
-      {
-        ofs_x_area << x_area(k) << endl;
-      }
-      ofs_x_area.close();
-
-      // x_flowQuantityの出力
-      ostringstream oss_x_flowQuantity;
-      oss_x_flowQuantity << "debug/x/flowQuantity/debug" << i << ".csv";
-      ofstream ofs_x_flowQuantity(oss_x_flowQuantity.str());
-      for (int k = 0; k < x_flowQuantity.size(); k++)
-      {
-        ofs_x_flowQuantity << x_flowQuantity(k) << endl;
-      }
-      ofs_x_flowQuantity.close();
-    }
-    // --------------------------------------------------------------------debug
   }
 }
 
