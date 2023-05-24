@@ -105,6 +105,10 @@ void output()
 void exec()
 {
   LeftPart leftPart = LeftPart::newLeftPart();
+  // 右辺の1~5項の内、計算をskipするものを指定する
+  vector<int> indices = {2, 4};
+  LeftPart::disable(leftPart, indices);
+
   ShapeFunction1D shape;
 
   // 時間ステップごとに計算

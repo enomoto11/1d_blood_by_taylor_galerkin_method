@@ -1,11 +1,4 @@
-struct LeftPartFlag
-{
-  bool shouldCalculateFirstTerm = true;
-  bool shouldCalculateSecondTerm = true;
-  bool shouldCalculateThirdTerm = true;
-  bool shouldCalculateFourthTerm = true;
-  bool shouldCalculateFifthTerm = true;
-};
+#include <cstdio>
 
 struct Flag
 {
@@ -32,10 +25,42 @@ struct LeftPart
 
     return lp;
   }
+
+  static void disable(LeftPart &lp, const std::vector<int> &indices)
+  {
+    if (indices.empty())
+      return;
+
+    for (int index : indices)
+    {
+      switch (index)
+      {
+      case 1:
+        lp.firstTerm.shouldCalculate = false;
+        break;
+      case 2:
+        lp.secondTerm.shouldCalculate = false;
+        break;
+      case 3:
+        lp.thirdTerm.shouldCalculate = false;
+        break;
+      case 4:
+        lp.fourthTerm.shouldCalculate = false;
+        break;
+      case 5:
+        lp.fifthTerm.shouldCalculate = false;
+        break;
+      default:
+        cout << "Invalid index provided: " << index << ". Exiting program..." << endl;
+        exit(1);
+      }
+    }
+  }
 };
 
-struct CheckArgs
+class CheckArgs
 {
+private:
   double b_area_ele0;
   double b_area_ele1;
   double b_flowQuantity_ele0;
@@ -44,6 +69,7 @@ struct CheckArgs
   int j;
   int index;
 
+public:
   static CheckArgs newCheckArgs(
       double b_area_ele0,
       double b_area_ele1,
@@ -64,15 +90,24 @@ struct CheckArgs
 
     return args;
   }
+
+  double getB_area_ele0() const { return b_area_ele0; }
+  double getB_area_ele1() const { return b_area_ele1; }
+  double getB_flowQuantity_ele0() const { return b_flowQuantity_ele0; }
+  double getB_flowQuantity_ele1() const { return b_flowQuantity_ele1; }
+  int getI() const { return i; }
+  int getJ() const { return j; }
+  int getIndex() const { return index; }
 };
 
-struct ExceptionManager
+class ExceptionManager
 {
-  static void check(CheckArgs args)
+public:
+  static void check(const CheckArgs &args)
   {
-    cout << "i = " << args.i << endl;
-    cout << "j = " << args.j << endl;
-    cout << args.index << "th term is nan Exit..." << endl;
+    cout << "i = " << args.getI() << endl;
+    cout << "j = " << args.getJ() << endl;
+    cout << args.getIndex() << "th term is nan Exit..." << endl;
     exit(1);
   }
 };
