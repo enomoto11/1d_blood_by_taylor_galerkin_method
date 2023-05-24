@@ -102,8 +102,9 @@ void output()
   ofs2.close();
 }
 
-void exec(LeftPartFlag flag)
+void exec()
 {
+  LeftPart leftPart = LeftPart::newLeftPart();
   ShapeFunction1D shape;
 
   // 時間ステップごとに計算
@@ -156,7 +157,6 @@ void exec(LeftPartFlag flag)
       for (int k = 0; k < 2; k++)
       {
         Gauss g(1);
-
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
         vector<double> dNdx(2, 0e0);
@@ -183,7 +183,7 @@ void exec(LeftPartFlag flag)
         double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
         double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
-        if (flag.shouldCalculateFirstTerm)
+        if (leftPart.firstTerm.shouldCalculate)
         {
           b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
@@ -192,13 +192,11 @@ void exec(LeftPartFlag flag)
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            cout << "i = " << i << endl;
-            cout << "j = " << j << endl;
-            cout << "first term is nan Exit..." << endl;
-            exit(1);
+            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.firstTerm.index);
+            ExceptionManager::check(args);
           }
         }
-        if (flag.shouldCalculateSecondTerm)
+        if (leftPart.secondTerm.shouldCalculate)
         {
           b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
@@ -207,26 +205,22 @@ void exec(LeftPartFlag flag)
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            cout << "i = " << i << endl;
-            cout << "j = " << j << endl;
-            cout << "second term is nan Exit..." << endl;
-            exit(1);
+            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.secondTerm.index);
+            ExceptionManager::check(args);
           }
         }
-        if (flag.shouldCalculateThirdTerm)
+        if (leftPart.thirdTerm.shouldCalculate)
         { // b_area has no third term
           b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            cout << "i = " << i << endl;
-            cout << "j = " << j << endl;
-            cout << "third term is nan Exit..." << endl;
-            exit(1);
+            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.thirdTerm.index);
+            ExceptionManager::check(args);
           }
         }
-        if (flag.shouldCalculateFourthTerm)
+        if (leftPart.fourthTerm.shouldCalculate)
         {
           b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
@@ -235,23 +229,19 @@ void exec(LeftPartFlag flag)
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            cout << "i = " << i << endl;
-            cout << "j = " << j << endl;
-            cout << "fourth term is nan Exit..." << endl;
-            exit(1);
+            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fourthTerm.index);
+            ExceptionManager::check(args);
           }
         }
-        if (flag.shouldCalculateFifthTerm)
+        if (leftPart.fifthTerm.shouldCalculate)
         { // b_area has no fifth term
           b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            cout << "i = " << i << endl;
-            cout << "j = " << j << endl;
-            cout << "fifth term is nan Exit..." << endl;
-            exit(1);
+            CheckArgs args = CheckArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fifthTerm.index);
+            ExceptionManager::check(args);
           }
         }
       }
@@ -274,11 +264,7 @@ int main()
 
   initVariables();
 
-  LeftPartFlag lpf;
-  lpf.shouldCalculateSecondTerm = false;
-  lpf.shouldCalculateFourthTerm = false;
-
-  exec(lpf);
+  exec();
 
   output();
 }
