@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 areas = np.loadtxt("output/dat/area.dat", dtype=float)
-ITERATED_TIME = 12
+iteratedTime = np.loadtxt("output/dat/iteratedTime.dat", dtype=int)
+
 
 length = []
 for i in range(101):
     length.append(i * 0.01)
 
-index = [f"t={10 * i}[s]" for i in range(ITERATED_TIME)]
+index = [f"t={10 * i}[s]" for i in range(iteratedTime)]
 
 fig = plt.figure()  # define the name for saving png file
 plt.rcParams["font.family"] = "sans-serif"  # 使用するフォント
@@ -26,7 +27,7 @@ plt.subplots_adjust(
 )
 
 
-for i in range(ITERATED_TIME):
+for i in range(iteratedTime):
     plt.plot(length, areas[i])
 
 

@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 flowQuantities = np.loadtxt("output/dat/flowQuantity.dat", dtype=float)
-ITERATED_TIME = 12
+iteratedTime = np.loadtxt("output/dat/iteratedTime.dat", dtype=int)
 
 length = []
 for i in range(101):
     length.append(i * 0.01)
 
-index = [f"t={10 * i}[s]" for i in range(ITERATED_TIME)]
+index = [f"t={10 * i}[s]" for i in range(iteratedTime)]
 
 fig = plt.figure()  # define the name for saving png file
 plt.rcParams["font.family"] = "sans-serif"  # 使用するフォント
@@ -25,7 +25,7 @@ plt.subplots_adjust(
     left=0.2, bottom=0.2, right=None, top=0.97, wspace=None, hspace=None
 )
 
-for j in range(ITERATED_TIME):
+for j in range(iteratedTime):
     plt.plot(length, flowQuantities[j])
 
 plt.xlabel("Length[m]")
