@@ -4,14 +4,18 @@ TARGET = main
 SRC = main.cpp
 GORUN = go run
 
-all: go_run $(TARGET)
-	./$(TARGET)
+all: go_run compile_and_run $(TARGET) python_scripts
 
 go_run:
 	cd input && $(GORUN) main.go
 
-$(TARGET): $(SRC)
+compile_and_run: $(SRC)
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET)
+	./$(TARGET)
+
+python_scripts:
+	python3 A.py
+	python3 Q.py
 
 clean:
 	rm -f $(TARGET)
