@@ -25,6 +25,37 @@
 using namespace std;
 using namespace Eigen;
 
+void arrest()
+{
+  fstream ifs1("input/element_d.dat"); // ファイル入力
+  for (int i = 0; i < ELEMENT_NUM; i++)
+  {
+    vector<double> element_t(2, 0);
+    for (int j = 0; j < 2; j++)
+    {
+      ifs1 >> element_t[j];
+    }
+    element[i] = element_t;
+  }
+  ifs1.close();
+
+  string str;
+  ifstream ifs2("input/node_d.dat");
+  while (getline(ifs2, str))
+  {
+    istringstream ss(str);
+    string tmp;
+    vector<double> tmp_x;
+    for (int j = 0; j < 1; j++)
+    {
+      getline(ss, tmp, ' ');
+      tmp_x.push_back(stod(tmp));
+    }
+    x.push_back(tmp_x[0]);
+  }
+  ifs2.close();
+}
+
 // init Q and A (which we want to calculate)
 void initVariables()
 {
@@ -85,12 +116,12 @@ void exec(LeftPartFlag flag)
 
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
-      Gauss g(1);
       int ele0 = element[j][0];
       int ele1 = element[j][1];
 
       for (int k = 0; k < 2; k++)
       {
+        Gauss g(1);
         vector<double> N(2, 0e0);
         vector<double> dNdr(2, 0e0);
 
@@ -110,62 +141,57 @@ void exec(LeftPartFlag flag)
         A_flowQuantity(ele1, ele1) += N.at(1) * N.at(1) * g.weight[k] * dxdr;
       }
     }
+
+    // B.C. : 0番目のnode点では常に流路面積, 速度一定
+    area[i][0] = A0;
+    flowQuantity[i][0] = A0 * v0;
+
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
-      Gauss g(1);
-      // B.C. : 0番目のnode点では常に流路面積, 速度一定
-      area[i][0] = A0;
-      flowQuantity[i][0] = A0 * v0;
-
       int ele0 = element[j][0];
       int ele1 = element[j][1];
       double flow0 = flowQuantity[i][ele0], flow1 = flowQuantity[i][ele1];
       double area0 = area[i][ele0], area1 = area[i][ele1];
 
-      if (flag.shouldCalculateFirstTerm)
+      for (int k = 0; k < 2; k++)
       {
-        for (int k = 0; k < 2; k++)
+        Gauss g(1);
+
+        vector<double> N(2, 0e0);
+        vector<double> dNdr(2, 0e0);
+        vector<double> dNdx(2, 0e0);
+        vector<double> dNinvdr(2, 0e0);
+        vector<double> dNinvdx(2, 0e0);
+
+        shape.P2_N(N, g.point[k]);
+        shape.P2_dNdr(dNdr, g.point[k]);
+        shape.P2_dNinvdr(dNinvdr, g.point[k]);
+
+        double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+        double drdx = 1e0 / dxdr;
+
+        dNdx.at(0) = dNdr.at(0) * drdx;
+        dNdx.at(1) = dNdr.at(1) * drdx;
+
+        dNinvdx.at(0) = dNinvdr.at(0) * drdx;
+        dNinvdx.at(1) = dNinvdr.at(1) * drdx;
+
+        double Q = N.at(0) * flow0 + N.at(1) * flow1;
+        double A = N.at(0) * area0 + N.at(1) * area1;
+        double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
+        double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
+        double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
+        double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
+
+        if (flag.shouldCalculateFirstTerm)
         {
-          vector<double> N(2, 0e0);
-          vector<double> dNdr(2, 0e0);
-
-          shape.P2_N(N, g.point[k]);
-          shape.P2_dNdr(dNdr, g.point[k]);
-
-          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
-
-          double Q = N.at(0) * flow0 + N.at(1) * flow1;
-          double A = N.at(0) * area0 + N.at(1) * area1;
-
           b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += N.at(0) * Q * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += N.at(1) * Q * g.weight[k] * dxdr;
         }
-      }
-
-      if (flag.shouldCalculateSecondTerm)
-      {
-        for (int k = 0; k < 2; k++)
+        if (flag.shouldCalculateSecondTerm)
         {
-          Gauss g(1);
-
-          vector<double> N(2, 0e0);
-          vector<double> dNdr(2, 0e0);
-          vector<double> dNdx(2, 0e0);
-
-          shape.P2_N(N, g.point[k]);
-          shape.P2_dNdr(dNdr, g.point[k]);
-
-          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
-          double drdx = 1e0 / dxdr;
-
-          dNdx.at(0) = dNdr.at(0) * drdx;
-          dNdx.at(1) = dNdr.at(1) * drdx;
-
-          double Q = N.at(0) * flow0 + N.at(1) * flow1;
-          double A = N.at(0) * area0 + N.at(1) * area1;
-
           b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += dNdx.at(0) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
@@ -188,105 +214,22 @@ void exec(LeftPartFlag flag)
             exit(1);
           }
         }
-      }
-
-      if (flag.shouldCalculateThirdTerm)
-      {
-        for (int k = 0; k < 2; k++)
-        {
-          Gauss g(1);
-
-          vector<double> N(2, 0e0);
-          vector<double> dNdr(2, 0e0);
-          vector<double> dNdx(2, 0e0);
-          vector<double> dNinvdr(2, 0e0);
-          vector<double> dNinvdx(2, 0e0);
-
-          shape.P2_N(N, g.point[k]);
-          shape.P2_dNdr(dNdr, g.point[k]);
-          shape.P2_dNinvdr(dNinvdr, g.point[k]);
-
-          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
-          double drdx = 1e0 / dxdr;
-
-          dNdx.at(0) = dNdr.at(0) * drdx;
-          dNdx.at(1) = dNdr.at(1) * drdx;
-
-          dNinvdx.at(0) = dNinvdr.at(0) * drdx;
-          dNinvdx.at(1) = dNinvdr.at(1) * drdx;
-
-          double Q = N.at(0) * flow0 + N.at(1) * flow1;
-          double A = N.at(0) * area0 + N.at(1) * area1;
-          double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
-          double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
-          double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
-          double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
-
-          // b_area has no third term
+        if (flag.shouldCalculateThirdTerm)
+        { // b_area has no third term
           b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
         }
-      }
-
-      if (flag.shouldCalculateFourthTerm)
-      {
-        for (int k = 0; k < 2; k++)
+        if (flag.shouldCalculateFourthTerm)
         {
-          Gauss g(1);
-
-          vector<double> N(2, 0e0);
-          vector<double> dNdr(2, 0e0);
-          vector<double> dNdx(2, 0e0);
-          vector<double> dNinvdr(2, 0e0);
-          vector<double> dNinvdx(2, 0e0);
-
-          shape.P2_N(N, g.point[k]);
-          shape.P2_dNdr(dNdr, g.point[k]);
-          shape.P2_dNinvdr(dNinvdr, g.point[k]);
-
-          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
-          double drdx = 1e0 / dxdr;
-
-          dNdx.at(0) = dNdr.at(0) * drdx;
-          dNdx.at(1) = dNdr.at(1) * drdx;
-
-          dNinvdx.at(0) = dNinvdr.at(0) * drdx;
-          dNinvdx.at(1) = dNinvdr.at(1) * drdx;
-
-          double Q = N.at(0) * flow0 + N.at(1) * flow1;
-          double A = N.at(0) * area0 + N.at(1) * area1;
-          double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
-          double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
-          double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
-          double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
-
           b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
         }
-      }
-
-      if (flag.shouldCalculateFifthTerm)
-      {
-        for (int k = 0; k < 2; k++)
-        {
-          Gauss g(1);
-
-          vector<double> N(2, 0e0);
-          vector<double> dNdr(2, 0e0);
-
-          shape.P2_N(N, g.point[k]);
-          shape.P2_dNdr(dNdr, g.point[k]);
-
-          double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
-
-          double Q = N.at(0) * flow0 + N.at(1) * flow1;
-          double A = N.at(0) * area0 + N.at(1) * area1;
-
-          // b_area has no fifth term
-          b_flowQuantity(ele0) += -N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
-          b_flowQuantity(ele1) += -N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+        if (flag.shouldCalculateFifthTerm)
+        { // b_area has no fifth term
+          b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+          b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
         }
       }
     }
@@ -346,37 +289,6 @@ void exec(LeftPartFlag flag)
     }
     // --------------------------------------------------------------------debug
   }
-}
-
-void arrest()
-{
-  fstream ifs1("input/element_d.dat"); // ファイル入力
-  for (int i = 0; i < ELEMENT_NUM; i++)
-  {
-    vector<double> element_t(2, 0);
-    for (int j = 0; j < 2; j++)
-    {
-      ifs1 >> element_t[j];
-    }
-    element[i] = element_t;
-  }
-  ifs1.close();
-
-  string str;
-  ifstream ifs2("input/node_d.dat");
-  while (getline(ifs2, str))
-  {
-    istringstream ss(str);
-    string tmp;
-    vector<double> tmp_x;
-    for (int j = 0; j < 1; j++)
-    {
-      getline(ss, tmp, ' ');
-      tmp_x.push_back(stod(tmp));
-    }
-    x.push_back(tmp_x[0]);
-  }
-  ifs2.close();
 }
 
 int main()

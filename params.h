@@ -7,13 +7,13 @@ int NODE_NUM = ELEMENT_NUM + 1;
 vector<vector<double>> element(ELEMENT_NUM, vector<double>(3, 0));
 vector<double> x;
 
-const double L = 1.0e0;                                      // tubeの長さ[m]
+const double L = 1.0e-1;                                     // tubeの長さ[m]
 const int M = 1200;                                          // 時間ステップ数[-]
-const double dt = 1.0e-03;                                   // 時間刻み[s]
+const double dt = 1.0e-04;                                   // 時間刻み[s]
 const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
 const double PI = M_PI;                                      // 円周率
-const double r0 = 1.0e-03;                                   // 初期状態のtubeの半径[m]
-const double h0 = 1.0e-04;                                   // 初期状態のtubeの厚さ[m]
+const double r0 = 1.0e-02;                                   // 初期状態のtubeの半径[m]
+const double h0 = r0 / 1e1;                                  // 初期状態のtubeの厚さ[m]
 const double A0 = PI * pow(r0 - h0, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）[m^2]
 const double K_R = 3.3e-06;                                  // 粘性抵抗K_R[m^2/s]
 const double rho = 1060000.0;                                // 密度[g/m^3]
