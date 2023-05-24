@@ -88,22 +88,22 @@ void output()
   ifsIteratedTime.close();
 
   ofstream ofs("output/dat/flowQuantity.dat");
-  for (int i = 0; i < 12; i++)
+  for (int i = 0; i < iteratedTime; i++)
   {
     for (int j = 0; j < NODE_NUM; j++)
     {
-      ofs << flowQuantity[i * 50][j] << " ";
+      ofs << flowQuantity[i * M / iteratedTime][j] << " ";
     }
     ofs << endl;
   }
   ofs.close();
 
   ofstream ofs2("output/dat/area.dat");
-  for (int i = 0; i < 12; i++)
+  for (int i = 0; i < iteratedTime; i++)
   {
     for (int j = 0; j < NODE_NUM; j++)
     {
-      ofs2 << area[i * 50][j] << " ";
+      ofs2 << area[i * M / iteratedTime][j] << " ";
     }
     ofs2 << endl;
   }
