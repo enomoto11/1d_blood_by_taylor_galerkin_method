@@ -29,7 +29,7 @@ using namespace Eigen;
 
 void arrest()
 {
-  fstream ifs1("input/element_d.dat"); // ファイル入力
+  fstream ifs1("input/element_d.dat");
   for (int i = 0; i < ELEMENT_NUM; i++)
   {
     vector<double> element_t(2, 0);
