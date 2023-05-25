@@ -20,7 +20,7 @@
 #include "shapefunction.h"
 #include "gauss.h"
 #include "params.h"
-#include "left-part.h"
+#include "right-part.h"
 #include "exception-args.h"
 #include "exception-manager.h"
 
@@ -112,10 +112,10 @@ void output()
 
 void exec()
 {
-  LeftPart leftPart = LeftPart::newLeftPart();
+  RightPart rightPart = RightPart::newRightPart();
   // 右辺の1~5項の内、計算をskipするものを指定する
   vector<int> indices = {2, 4};
-  LeftPart::disable(leftPart, indices);
+  RightPart::disable(rightPart, indices);
 
   ShapeFunction1D shape;
 
@@ -195,7 +195,7 @@ void exec()
         double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
         double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
 
-        if (leftPart.firstTerm.shouldCalculate)
+        if (rightPart.firstTerm.shouldCalculate)
         {
           b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
           b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
@@ -204,11 +204,11 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.firstTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.firstTerm.index);
             ExceptionManager::check(args);
           }
         }
-        if (leftPart.secondTerm.shouldCalculate)
+        if (rightPart.secondTerm.shouldCalculate)
         {
           b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
           b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
@@ -217,22 +217,22 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.secondTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.secondTerm.index);
             ExceptionManager::check(args);
           }
         }
-        if (leftPart.thirdTerm.shouldCalculate)
+        if (rightPart.thirdTerm.shouldCalculate)
         { // b_area has no third term
           b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.thirdTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.thirdTerm.index);
             ExceptionManager::check(args);
           }
         }
-        if (leftPart.fourthTerm.shouldCalculate)
+        if (rightPart.fourthTerm.shouldCalculate)
         {
           b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
           b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
@@ -241,18 +241,18 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fourthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.fourthTerm.index);
             ExceptionManager::check(args);
           }
         }
-        if (leftPart.fifthTerm.shouldCalculate)
+        if (rightPart.fifthTerm.shouldCalculate)
         { // b_area has no fifth term
           b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, leftPart.fifthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.fifthTerm.index);
             ExceptionManager::check(args);
           }
         }
