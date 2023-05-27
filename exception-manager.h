@@ -5,6 +5,10 @@ public:
   {
     std::cout << "i = " << args.getI() << std::endl;
     std::cout << "j = " << args.getJ() << std::endl;
+    std::cout << "b_area_ele0 = " << args.getB_area_ele0() << std::endl;
+    std::cout << "b_area_ele1 = " << args.getB_area_ele1() << std::endl;
+    std::cout << "b_flowQuantity_ele0 = " << args.getB_flowQuantity_ele0() << std::endl;
+    std::cout << "b_flowQuantity_ele1 = " << args.getB_flowQuantity_ele1() << std::endl;
     std::cout << args.getIndex() << "th term is nan Exit..." << std::endl;
     exit(1);
   }
