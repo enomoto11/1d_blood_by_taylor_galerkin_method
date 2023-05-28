@@ -72,8 +72,8 @@ void initVariables()
     }
     else
     {
-      area[0][i] = A0 / 1.5e0;
-      velocity[0][i] = v0 * 1.5e0;
+      area[0][i] = A0 / 1.1e0;
+      velocity[0][i] = v0 * 1.1e0;
       flowQuantity[0][i] = area[0][i] * velocity[0][i];
     }
   }
@@ -108,6 +108,17 @@ void output()
     ofs2 << endl;
   }
   ofs2.close();
+
+  ofstream ofs3("output/dat/velocity.dat");
+  for (int i = 0; i < iteratedTime; i++)
+  {
+    for (int j = 0; j < NODE_NUM; j++)
+    {
+      ofs3 << flowQuantity[i * M / iteratedTime][j] / area[i * M / iteratedTime][j] << " ";
+    }
+    ofs3 << endl;
+  }
+  ofs3.close();
 }
 
 void exec()
@@ -156,7 +167,7 @@ void exec()
     }
 
     // B.C. : 0番目のnode点では常に流路面積, 速度一定
-    area[i][0] = A0;
+    area[i][0] = A0 * (1e0 + 1e-1 * sin(2e0 * M_PI * i / M));
     flowQuantity[i][0] = A0 * v0;
 
     for (int j = 0; j < ELEMENT_NUM; j++)

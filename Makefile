@@ -16,6 +16,7 @@ compile_and_run: $(SRC)
 python_scripts:
 	python3 A.py
 	python3 Q.py
+	python3 U.py
 
 clean:
 	rm -f $(TARGET)
