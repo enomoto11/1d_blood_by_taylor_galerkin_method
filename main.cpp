@@ -61,21 +61,27 @@ void input()
 // init Q and A (which we want to calculate)
 void initVariables()
 {
+  // for (int i = 0; i < NODE_NUM; i++)
+  // {
+  //   // 初期状態のnodeに与える速度はノード点の位置によって変える
+  //   if (i < 60)
+  //   {
+  //     area[0][i] = A0;
+  //     velocity[0][i] = v0;
+  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  //   }
+  //   else
+  //   {
+  //     area[0][i] = A0 / 1.1e0;
+  //     velocity[0][i] = v0 * 1.1e0;
+  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  //   }
+  // }
   for (int i = 0; i < NODE_NUM; i++)
   {
-    // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i < 60)
-    {
-      area[0][i] = A0;
-      velocity[0][i] = v0;
-      flowQuantity[0][i] = area[0][i] * velocity[0][i];
-    }
-    else
-    {
-      area[0][i] = A0 / 1.1e0;
-      velocity[0][i] = v0 * 1.1e0;
-      flowQuantity[0][i] = area[0][i] * velocity[0][i];
-    }
+    area[0][i] = A0;
+    velocity[0][i] = v0;
+    flowQuantity[0][i] = area[0][i] * velocity[0][i];
   }
 }
 
@@ -125,7 +131,7 @@ void exec()
 {
   RightPart rightPart = RightPart::newRightPart();
   // 右辺の1~5項の内、計算をskipするものを指定する
-  vector<int> indices = {2, 4};
+  vector<int> indices = {};
   RightPart::disable(rightPart, indices);
 
   ShapeFunction1D shape;
@@ -167,8 +173,8 @@ void exec()
     }
 
     // B.C. : 0番目のnode点では常に流路面積, 速度一定
-    area[i][0] = A0 * (1e0 + 1e-1 * sin(2e0 * M_PI * i / M));
-    flowQuantity[i][0] = A0 * v0;
+    area[i][0] = A0;
+    flowQuantity[i][0] = A0 * v0 * (1e-1 * sin(2e0 * M_PI * i / M) + 1e0);
 
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
@@ -234,8 +240,8 @@ void exec()
         }
         if (rightPart.thirdTerm.shouldCalculate)
         { // b_area has no third term
-          b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
-          b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx + (K_R / A) * dQQAdx + (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
+          b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx - (K_R / A) * dQQAdx - (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
+          b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx - (K_R / A) * dQQAdx - (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
@@ -245,8 +251,8 @@ void exec()
         }
         if (rightPart.fourthTerm.shouldCalculate)
         {
-          b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
-          b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
+          b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, 5e-1) * dAdx) * g.weight[k] * dxdr;
+          b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, 5e-1) * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
           b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
 
@@ -258,8 +264,8 @@ void exec()
         }
         if (rightPart.fifthTerm.shouldCalculate)
         { // b_area has no fifth term
-          b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
-          b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A - dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+          b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A + dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+          b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A + dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
