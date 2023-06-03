@@ -183,8 +183,7 @@ void output()
 void exec()
 {
   RightPart rightPart = RightPart::newRightPart();
-  // 右辺の1~5項の内、計算をskipするものを指定する
-  vector<int> indices = {};
+  vector<int> indices = {}; // 右辺の1~5項の内、計算をskipするものを指定する, (example) {2,4}
   RightPart::disable(rightPart, indices);
 
   ShapeFunction1D shape;
