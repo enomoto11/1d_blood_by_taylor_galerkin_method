@@ -58,33 +58,55 @@ void input()
   ifs2.close();
 }
 
-// init Q and A (which we want to calculate)
-void initVariables()
+void init(int toggle)
 {
-  // double rate = 1.1e0;
-  // for (int i = 0; i < NODE_NUM; i++)
-  // {
-  //   // 初期状態のnodeに与える速度はノード点の位置によって変える
-  //   // if (i < NODE_NUM / 3 || i > NODE_NUM * 2 / 3)
-  //   if (i < NODE_NUM / 3)
-
-  //   {
-  //     area[0][i] = A0 / rate;
-  //     velocity[0][i] = v0 * rate;
-  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
-  //   }
-  //   else
-  //   {
-  //     area[0][i] = A0;
-  //     velocity[0][i] = v0;
-  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
-  //   }
-  // }
-  for (int i = 0; i < NODE_NUM; i++)
+  switch (toggle)
   {
-    area[0][i] = A0;
-    velocity[0][i] = v0;
-    flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  case 1:
+    for (int i = 0; i < NODE_NUM; i++)
+    {
+      double rate = 1.1e0;
+
+      if (i == 0)
+      {
+        area[0][i] = A0;
+        velocity[0][i] = 0e0;
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+      else if (i != 0 && i < NODE_NUM / 3)
+      {
+        area[0][i] = A0 / rate;
+        velocity[0][i] = v0 * rate;
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+      else
+      {
+        area[0][i] = A0;
+        velocity[0][i] = v0;
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+    }
+  case 2:
+    for (int i = 0; i < NODE_NUM; i++)
+    {
+      area[0][i] = A0;
+      if (i == 0)
+      {
+        velocity[0][i + 1] = velocity[0][i];
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+      if (i == NODE_NUM - 2)
+      {
+        velocity[0][i] = velocity[0][i + 1];
+      }
+    }
+  default:
+    for (int i = 0; i < NODE_NUM; i++)
+    {
+      area[0][i] = A0;
+      velocity[0][i] = v0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
   }
 }
 
@@ -324,7 +346,7 @@ int main()
 {
   input();
 
-  initVariables();
+  init(0);
 
   exec();
 
