@@ -9,7 +9,7 @@ vector<double> x;
 
 const double L = 1.0e-1;                                     // tubeの長さ[m]
 const int M = 1200;                                          // 時間ステップ数[-]
-const double dt = 1.0e-07;                                   // 時間刻み[s]
+const double dt = 5.0e-07;                                   // 時間刻み[s]
 const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
 const double PI = M_PI;                                      // 円周率
 const double r0 = 1.0e-02;                                   // 初期状態のtubeの半径[m]
@@ -26,3 +26,7 @@ double v0 = 1.0e0; // 所定位置における初期状態のtubeの流速[m/s]
 vector<vector<double>> area(M + 1, vector<double>(NODE_NUM, 0e0));
 vector<vector<double>> velocity(M + 1, vector<double>(NODE_NUM, 0e0));
 vector<vector<double>> flowQuantity(M + 1, vector<double>(NODE_NUM, 0e0));
+
+vector<double> pressure1(M + 1, 0e0);
+vector<double> pressure2(M + 1, 0e0);
+vector<double> pressure3(M + 1, 0e0);

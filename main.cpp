@@ -61,10 +61,11 @@ void input()
 // init Q and A (which we want to calculate)
 void initVariables()
 {
+  double rate = 1.1e0;
   for (int i = 0; i < NODE_NUM; i++)
   {
     // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i < 60)
+    if (i < NODE_NUM / 3 || i > NODE_NUM * 2 / 3)
     {
       area[0][i] = A0;
       velocity[0][i] = v0;
@@ -72,8 +73,8 @@ void initVariables()
     }
     else
     {
-      area[0][i] = A0 / 1.1e0;
-      velocity[0][i] = v0 * 1.1e0;
+      area[0][i] = A0 / rate;
+      velocity[0][i] = v0 * rate;
       flowQuantity[0][i] = area[0][i] * velocity[0][i];
     }
   }
@@ -125,6 +126,34 @@ void output()
     ofs3 << endl;
   }
   ofs3.close();
+
+  ofstream ofs4("output/dat/pressure1.dat");
+  ofstream ofs5("output/dat/pressure2.dat");
+  ofstream ofs6("output/dat/pressure3.dat");
+  for (int i = 0; i < M; i++)
+  {
+    for (int j = 0; j < NODE_NUM; j++)
+    {
+      if (j == NODE_NUM / 4)
+      {
+        ofs4 << betha * (sqrt(area[i][j]) - sqrt(A0)) << " ";
+      }
+      if (j == NODE_NUM / 2)
+      {
+        ofs5 << betha * (sqrt(area[i][j]) - sqrt(A0)) << " ";
+      }
+      if (j == NODE_NUM * 3 / 4)
+      {
+        ofs6 << betha * (sqrt(area[i][j]) - sqrt(A0)) << " ";
+      }
+    }
+    ofs4 << endl;
+    ofs5 << endl;
+    ofs6 << endl;
+  }
+  ofs4.close();
+  ofs5.close();
+  ofs6.close();
 }
 
 void exec()
