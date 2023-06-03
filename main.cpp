@@ -61,29 +61,31 @@ void input()
 // init Q and A (which we want to calculate)
 void initVariables()
 {
-  double rate = 1.1e0;
-  for (int i = 0; i < NODE_NUM; i++)
-  {
-    // 初期状態のnodeに与える速度はノード点の位置によって変える
-    if (i < NODE_NUM / 3 || i > NODE_NUM * 2 / 3)
-    {
-      area[0][i] = A0;
-      velocity[0][i] = v0;
-      flowQuantity[0][i] = area[0][i] * velocity[0][i];
-    }
-    else
-    {
-      area[0][i] = A0 / rate;
-      velocity[0][i] = v0 * rate;
-      flowQuantity[0][i] = area[0][i] * velocity[0][i];
-    }
-  }
+  // double rate = 1.1e0;
   // for (int i = 0; i < NODE_NUM; i++)
   // {
-  //   area[0][i] = A0;
-  //   velocity[0][i] = v0;
-  //   flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  //   // 初期状態のnodeに与える速度はノード点の位置によって変える
+  //   // if (i < NODE_NUM / 3 || i > NODE_NUM * 2 / 3)
+  //   if (i < NODE_NUM / 3)
+
+  //   {
+  //     area[0][i] = A0 / rate;
+  //     velocity[0][i] = v0 * rate;
+  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  //   }
+  //   else
+  //   {
+  //     area[0][i] = A0;
+  //     velocity[0][i] = v0;
+  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  //   }
   // }
+  for (int i = 0; i < NODE_NUM; i++)
+  {
+    area[0][i] = A0;
+    velocity[0][i] = v0;
+    flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  }
 }
 
 void output()
@@ -202,8 +204,10 @@ void exec()
     }
 
     // B.C. : 0番目のnode点では常に流路面積, 速度一定
-    area[i][0] = A0;
-    flowQuantity[i][0] = A0 * v0;
+    // area[i][0] = A0;
+    // area[i][NODE_NUM - 1] = A0;
+    // flowQuantity[i][0] = A0 * v0;
+    // flowQuantity[i][NODE_NUM - 1] = A0 * v0;
 
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
