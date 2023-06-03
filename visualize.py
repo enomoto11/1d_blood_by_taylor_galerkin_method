@@ -143,13 +143,13 @@ def visualizePressure(file1, file2, file3, output_file):
     fig, ax = plt.subplots()
 
     # Plot the data
-    ax.plot(x_values, data1, linestyle="-", label="Data 1")
-    ax.plot(x_values, data2, linestyle="--", label="Data 2")
-    ax.plot(x_values, data3, linestyle=":", label="Data 3")
+    ax.plot(x_values, data1, linestyle="-", label="P")
+    ax.plot(x_values, data2, linestyle="--", label="M")
+    ax.plot(x_values, data3, linestyle=":", label="D")
 
     # Set labels and legend
-    ax.set_xlabel("Normalized index")
-    ax.set_ylabel("Values")
+    ax.set_xlabel("time [-]")
+    ax.set_ylabel("Pressure [Pa]")
     ax.legend()
 
     # Save the figure
