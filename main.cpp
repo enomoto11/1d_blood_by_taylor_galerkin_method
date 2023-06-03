@@ -61,28 +61,28 @@ void input()
 // init Q and A (which we want to calculate)
 void initVariables()
 {
-  // for (int i = 0; i < NODE_NUM; i++)
-  // {
-  //   // 初期状態のnodeに与える速度はノード点の位置によって変える
-  //   if (i < 60)
-  //   {
-  //     area[0][i] = A0;
-  //     velocity[0][i] = v0;
-  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
-  //   }
-  //   else
-  //   {
-  //     area[0][i] = A0 / 1.1e0;
-  //     velocity[0][i] = v0 * 1.1e0;
-  //     flowQuantity[0][i] = area[0][i] * velocity[0][i];
-  //   }
-  // }
   for (int i = 0; i < NODE_NUM; i++)
   {
-    area[0][i] = A0;
-    velocity[0][i] = v0;
-    flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    // 初期状態のnodeに与える速度はノード点の位置によって変える
+    if (i < 60)
+    {
+      area[0][i] = A0;
+      velocity[0][i] = v0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
+    else
+    {
+      area[0][i] = A0 / 1.1e0;
+      velocity[0][i] = v0 * 1.1e0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
   }
+  // for (int i = 0; i < NODE_NUM; i++)
+  // {
+  //   area[0][i] = A0;
+  //   velocity[0][i] = v0;
+  //   flowQuantity[0][i] = area[0][i] * velocity[0][i];
+  // }
 }
 
 void output()
@@ -174,7 +174,7 @@ void exec()
 
     // B.C. : 0番目のnode点では常に流路面積, 速度一定
     area[i][0] = A0;
-    flowQuantity[i][0] = A0 * v0 * (1e-1 * sin(2e0 * M_PI * i / M) + 1e0);
+    flowQuantity[i][0] = A0 * v0;
 
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
@@ -221,7 +221,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.firstTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), A, Q, i, j, rightPart.firstTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -234,7 +234,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.secondTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), A, Q, i, j, rightPart.secondTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -245,7 +245,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.thirdTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), A, Q, i, j, rightPart.thirdTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -258,7 +258,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.fourthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), A, Q, i, j, rightPart.fourthTerm.index);
             ExceptionManager::check(args);
           }
         }
@@ -269,7 +269,7 @@ void exec()
 
           if (b_area(ele0) < 0e0 || b_area(ele1) < 0e0 || b_flowQuantity(ele0) < 0e0 || b_flowQuantity(ele1) < 0e0 || Q < 0e0 || A < 0e0)
           {
-            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), i, j, rightPart.fifthTerm.index);
+            ExceptionArgs args = ExceptionArgs::newCheckArgs(b_area(ele0), b_area(ele1), b_flowQuantity(ele0), b_flowQuantity(ele1), A, Q, i, j, rightPart.fifthTerm.index);
             ExceptionManager::check(args);
           }
         }
