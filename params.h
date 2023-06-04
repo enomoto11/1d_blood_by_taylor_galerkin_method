@@ -19,8 +19,7 @@ const double K_R = 3.3e-06;                                  // 粘性抵抗K_R[
 const double rho = 1060000.0;                                // 密度[g/m^3]
 const double E = 1.0e08;                                     // ヤング率(0.1MPa)[g/m/s^2]
 const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
-// const double dbetha_dx = -4.0 / 3.0 * h0 * sqrt(PI) / PI / PI * E * 1.0e8; // dß/dx
-double v0 = 1.0e0; // 所定位置における初期状態のtubeの流速[m/s]
+double v0 = 1.0e0;                                           // 所定位置における初期状態のtubeの流速[m/s]
 
 // [時刻][node番号]
 vector<vector<double>> area(M + 1, vector<double>(NODE_NUM, 0e0));
