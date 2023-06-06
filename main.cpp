@@ -60,13 +60,20 @@ void input()
 
 void init(int toggle)
 {
-  switch (toggle)
+  if (toggle == 0)
   {
-  case 1:
+    for (int i = 0; i < NODE_NUM; i++)
+    {
+      area[0][i] = A0;
+      velocity[0][i] = v0;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
+  }
+  else if (toggle == 1)
+  {
     for (int i = 0; i < NODE_NUM; i++)
     {
       double rate = 1.1e0;
-
       if (i == 0)
       {
         area[0][i] = A0;
@@ -86,7 +93,9 @@ void init(int toggle)
         flowQuantity[0][i] = area[0][i] * velocity[0][i];
       }
     }
-  case 2:
+  }
+  else if (toggle == 2)
+  {
     for (int i = 0; i < NODE_NUM; i++)
     {
       area[0][i] = A0;
@@ -100,11 +109,43 @@ void init(int toggle)
         velocity[0][i] = velocity[0][i + 1];
       }
     }
-  default:
+  }
+  else if (toggle == 3)
+  {
+    for (int i = 0; i < NODE_NUM; i++)
+    {
+      if (i < NODE_NUM / 2e0)
+      {
+        area[0][i] = A0;
+        velocity[0][i] = v0;
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+      else
+      {
+        area[0][i] = A0;
+        velocity[0][i] = v0 / 2e0;
+        flowQuantity[0][i] = area[0][i] * velocity[0][i];
+      }
+    }
+  }
+  else if (toggle == 4)
+  {
     for (int i = 0; i < NODE_NUM; i++)
     {
       area[0][i] = A0;
-      velocity[0][i] = v0;
+      velocity[0][i] = v0 * 10;
+      flowQuantity[0][i] = area[0][i] * velocity[0][i];
+    }
+  }
+  else if (toggle == 5)
+  {
+    area[0][0] = A0;
+    velocity[0][0] = v0;
+    flowQuantity[0][0] = area[0][0] * velocity[0][0];
+    for (int i = 1; i < NODE_NUM; i++)
+    {
+      area[0][i] = A0;
+      velocity[0][i] = v0 / 1e2;
       flowQuantity[0][i] = area[0][i] * velocity[0][i];
     }
   }
@@ -224,11 +265,9 @@ void exec()
       }
     }
 
-    // B.C. : 0番目のnode点では常に流路面積, 速度一定
-    // area[i][0] = A0;
-    // area[i][NODE_NUM - 1] = A0;
-    // flowQuantity[i][0] = A0 * v0;
-    // flowQuantity[i][NODE_NUM - 1] = A0 * v0;
+    // 境界条件
+    area[i][NODE_NUM - 1] = A0;
+    flowQuantity[i][0] = A0 * v0 * (1e0 + 1e-1 * sin(2e0 * M_PI * 5e0 * i / M));
 
     for (int j = 0; j < ELEMENT_NUM; j++)
     {
@@ -345,7 +384,7 @@ int main()
 {
   input();
 
-  init(0);
+  init(5);
 
   exec();
 

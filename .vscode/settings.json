@@ -76,6 +76,7 @@
     "unordered_set": "cpp",
     "valarray": "cpp",
     "stacktrace": "cpp",
-    "fft": "cpp"
+    "fft": "cpp",
+    "iterator": "cpp"
   }
 }

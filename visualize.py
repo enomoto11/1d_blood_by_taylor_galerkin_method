@@ -27,7 +27,7 @@ def visualizeVelocity(velocity_file, iteratedTime_file, output_file):
         fontsize=10,
     )
 
-    plt.ylim(0.99998, 1.00001)
+    # plt.ylim(0.99998, 1.00001)
 
     plt.rcParams["font.family"] = "sans-serif"  # 使用するフォント
     # x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
