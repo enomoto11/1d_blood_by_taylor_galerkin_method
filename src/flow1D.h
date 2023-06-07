@@ -76,11 +76,14 @@ class FLOW1D {
   void input();
   void init(int toggle);
 
+  void output_init();
   void output(const int iter);
   void exec(const int iter);
 
+  void exportVTP(const int iter);
+
  private:
-  void compute_LHS(Eigen::MatrixXd &A_area,Eigen::MatrixXd &A_flowQuantity);
+  void compute_LHS(Eigen::MatrixXd &A);
   void compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity,const int iter);
 
 };
