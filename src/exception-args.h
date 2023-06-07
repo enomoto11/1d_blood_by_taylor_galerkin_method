@@ -1,3 +1,6 @@
+#ifndef _EXCEPTION_ARG_H_
+#define _EXCEPTION_ARG_H_
+
 class ExceptionArgs
 {
 private:
@@ -47,3 +50,5 @@ public:
   int getJ() const { return j; }
   int getIndex() const { return index; }
 };
+
+#endif

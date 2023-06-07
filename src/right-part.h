@@ -1,3 +1,6 @@
+#ifndef _RIGHT_PART_H_
+#define _RIGHT_PART_H_
+
 #include "flag.h"
 // #include <iostream>
 
@@ -52,3 +55,5 @@ struct RightPart
     }
   }
 };
+
+#endif

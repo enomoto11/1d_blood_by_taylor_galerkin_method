@@ -24,6 +24,8 @@ add_executable(${main_target} ${main_src})
 target_sources(${main_target}
   PRIVATE
     main.cpp
+    flow1D.cpp
+    preprocess.cpp
 )
 target_compile_options(${main_target} PUBLIC ${compile_options_tmp})
 

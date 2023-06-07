@@ -1,3 +1,6 @@
+#ifndef _SHAPEFUNCTION_H_
+#define _SHAPEFUNCTION_H_
+
 #include <iostream>
 #include <vector>
 
@@ -23,3 +26,5 @@ public:
     dNinvdr.at(1) = 5e-1 * (1e0 + g1) * (1e0 + g1);
   }
 };
+
+#endif
