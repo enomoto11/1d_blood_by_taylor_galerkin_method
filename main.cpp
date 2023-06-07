@@ -13,8 +13,8 @@
 #include <vector>
 #include <math.h>
 #include <cmath>
-#include "Eigen/Core"
-#include "Eigen/LU"
+#include "lib/eigen/Eigen/Core"
+#include "lib/eigen/Eigen/LU"
 #include <cstdio>
 #include <iomanip>
 #include "shapefunction.h"
