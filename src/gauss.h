@@ -1,3 +1,6 @@
+#ifndef _GAUSS_H_
+#define _GAUSS_H_
+
 class Gauss
 {
 public:
@@ -36,3 +39,5 @@ public:
 	}
 	double point[4], weight[4];
 };
+
+#endif

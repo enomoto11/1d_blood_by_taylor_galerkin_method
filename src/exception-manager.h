@@ -1,3 +1,6 @@
+#ifndef _EXCEPTION_MANAGER_H_
+#define _EXCEPTION_MANAGER_H_
+
 class ExceptionManager
 {
 public:
@@ -15,3 +18,5 @@ public:
     exit(1);
   }
 };
+
+#endif
