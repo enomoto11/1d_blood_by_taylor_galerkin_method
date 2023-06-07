@@ -1,4 +1,3 @@
-#include <math.h>
 #include <cmath>
 
 int ELEMENT_NUM = 100;
