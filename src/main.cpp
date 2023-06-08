@@ -21,11 +21,14 @@ int main(int argc,char *argv[])
   flow1D.init(5);
   flow1D.output_init();
 
-  for (int iter = 0; iter < flow1D.M; iter++)
+  int output_iter = 1;
+
+  for (int iter = 0; iter < 1; iter++)
   {
     flow1D.exec(iter);
     flow1D.output(iter);
-    flow1D.exportVTP(iter);
-    exit(1);
+    if(iter%output_iter==0){
+      flow1D.exportVTP(iter/output_iter);
+    }
   }
 }

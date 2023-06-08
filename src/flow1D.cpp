@@ -7,24 +7,32 @@ void FLOW1D::exec(const int iter)
 {
   MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
   MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
-  VectorXd b_area = VectorXd::Zero(NODE_NUM);
-  VectorXd b_flowQuantity = VectorXd::Zero(NODE_NUM);
+  b_area = VectorXd::Zero(NODE_NUM);
+  b_flowQuantity = VectorXd::Zero(NODE_NUM);
 
   compute_LHS(A_area);
-
   A_flowQuantity = A_area;
 
   compute_RHS(b_area,b_flowQuantity,iter);
 
   //boundary condition
-  area[NODE_NUM - 1] = A0;
+  for(int j=0;j<NODE_NUM;j++){
+    A_area(0,j) = 0e0;
+    A_area(NODE_NUM-1,j) = 0e0;
+  }
+  A_area(0,0) = 1e0;
+  A_area(NODE_NUM-1,NODE_NUM-1) = 1e0;
+
+  b_area(0) = A0;
+  b_area(NODE_NUM-1) = A0;
 
   Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
 
   //boundary condition
   for(int j=0;j<NODE_NUM;j++) A_flowQuantity(0,j) = 0e0;
   A_flowQuantity(0,0) = 1e0;
-  flowQuantity[0] = A0 * v0 * (1e0 + 1e-1 * sin(2e0 * M_PI * 5e0 * iter / M));
+  // flowQuantity[0] = A0 * v0 * (1e0 + 1e-1 * sin(2e0 * M_PI * 5e0 * iter / M));
+  b_flowQuantity(0) = A0 * 1e0;
 
   Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
 
@@ -32,6 +40,7 @@ void FLOW1D::exec(const int iter)
   {
     area[j] = x_area(j);
     flowQuantity[j] = x_flowQuantity(j);
+    pressure[j] = beta * (sqrt(area[j])-sqrt(A0));
   }
 }
 
@@ -70,63 +79,101 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
     double flow0 = flowQuantity[ele0], flow1 = flowQuantity[ele1];
     double area0 = area[ele0], area1 = area[ele1];
 
+    array<double,2> G0,G1;
+    G0[0] = flow0;
+    G0[1] = flow0*flow0/area0 + beta/(3e0*rho)*pow(area0,1.5e0);
+    G1[0] = flow1;
+    G1[1] = flow1*flow1/area1 + beta/(3e0*rho)*pow(area1,1.5e0);
+
+    array<double,2> B0,B1;
+    B0[0] = 0e0;
+    B0[1] = -K_R*flow0/area0; //dbdx = 0
+    B1[0] = 0e0;
+    B1[1] = -K_R*flow1/area1; //dbdx = 0
+
     Gauss g(1);
-    vector<double> N(2);
-    vector<double> dNdr(2);
-    vector<double> dNdx(2);
-    vector<double> dNinvdr(2);
-    vector<double> dNinvdx(2);
+  
+    vector<double> N(2),dNdr(2),dNdx(2);
 
     for (int k = 0; k < 2; k++)
     {
       ShapeFunction1D::P2_N(N, g.point[k]);
       ShapeFunction1D::P2_dNdr(dNdr, g.point[k]);
-      ShapeFunction1D::P2_dNinvdr(dNinvdr, g.point[k]);
 
-      double dxdr = dNdr.at(0) * x.at(ele0) + dNdr.at(1) * x.at(ele1);
+      double dxdr = dNdr[0] * x.at(ele0) + dNdr[1] * x.at(ele1);
       double drdx = 1e0 / dxdr;
 
-      dNdx.at(0) = dNdr.at(0) * drdx;
-      dNdx.at(1) = dNdr.at(1) * drdx;
+      dNdx[0] = dNdr[0] * drdx;
+      dNdx[1] = dNdr[1] * drdx;
 
-      dNinvdx.at(0) = dNinvdr.at(0) * drdx;
-      dNinvdx.at(1) = dNinvdr.at(1) * drdx;
+      double Flow = N.at(0) * flow0 + N.at(1) * flow1;
+      double Area = N.at(0) * area0 + N.at(1) * area1;
 
-      double Q = N.at(0) * flow0 + N.at(1) * flow1;
-      double A = N.at(0) * area0 + N.at(1) * area1;
-      double dQdx = dNdx.at(0) * flow0 + dNdx.at(1) * flow1;
-      double dAdx = dNdx.at(0) * area0 + dNdx.at(1) * area1;
-      double dAinvdx = dNinvdx.at(0) / area0 + dNinvdx.at(1) / area1;
-      double dQQAdx = dAinvdx * Q * Q + (1 / A) * dQdx * Q + (1 / A) * Q * dQdx;
+      Vector2d G,B,dGdx;
+      G(0) = N[0]*G0[0]+N[1]*G1[0];
+      G(1) = N[0]*G0[1]+N[1]*G1[1];
+
+      dGdx(0) = dNdx[0]*G0[0] + dNdx[1]*G1[0];
+      dGdx(1) = dNdx[0]*G0[1] + dNdx[1]*G1[1];
+
+      B(0) = N[0]*B0[0]+N[1]*B1[0];
+      B(1) = N[0]*B0[1]+N[1]*B1[1];
+
+      Matrix2d dGdQ,dBdQ;
+      dGdQ(0,0) = 0e0;
+      dGdQ(0,1) = 1e0;
+      dGdQ(1,0) = -Flow*Flow/(Area*Area)+5e-1*beta/rho*sqrt(Area);
+      dGdQ(1,1) = 2e0*Flow/Area;
+
+      dBdQ(0,0) = 0e0;
+      dBdQ(0,1) = 0e0;
+      dBdQ(1,0) = K_R*Flow/(Area*Area);
+      dBdQ(1,1) =-K_R/Area;
+
+      Vector2d G_LW = G + 5e-1*dt * dGdQ * B;
+      Vector2d B_LW = B + 5e-1*dt * dBdQ * B;
 
       //first term
-      b_area(ele0) += N.at(0) * A * g.weight[k] * dxdr;
-      b_area(ele1) += N.at(1) * A * g.weight[k] * dxdr;
-      b_flowQuantity(ele0) += N.at(0) * Q * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += N.at(1) * Q * g.weight[k] * dxdr;
+      b_area(ele0)         += N.at(0) * Area * g.weight[k] * dxdr;
+      b_area(ele1)         += N.at(1) * Area * g.weight[k] * dxdr;
+      b_flowQuantity(ele0) += N.at(0) * Flow * g.weight[k] * dxdr;
+      b_flowQuantity(ele1) += N.at(1) * Flow * g.weight[k] * dxdr;
 
       //second term
-      b_area(ele0) += dNdx.at(0) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
-      b_area(ele1) += dNdx.at(1) * dt * (Q + dt / 2e0 * (-K_R * Q / A)) * g.weight[k] * dxdr;
-      b_flowQuantity(ele0) += dNdx.at(0) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += dNdx.at(1) * dt * (Q * Q / A + betha / 3e0 / rho * pow(A, 1.5e0) + dt * Q / A * (-K_R * Q / A)) * g.weight[k] * dxdr;
+      if(j==0) cout << G_LW << endl;
+      b_area(ele0)         += dNdx.at(0) * dt * G_LW(0) * g.weight[k] * dxdr;
+      b_area(ele1)         += dNdx.at(1) * dt * G_LW(0) * g.weight[k] * dxdr;
+      b_flowQuantity(ele0) += dNdx.at(0) * dt * G_LW(1) * g.weight[k] * dxdr;
+      b_flowQuantity(ele1) += dNdx.at(1) * dt * G_LW(1) * g.weight[k] * dxdr;
 
       //third term
-      b_flowQuantity(ele0) += -N.at(0) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx - (K_R / A) * dQQAdx - (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += -N.at(1) * dt * dt / 2.0e0 * (K_R * Q / (A * A) * dQdx - (K_R / A) * dQQAdx - (betha * K_R / (2e0 * rho)) * pow(A, -5e-1) * dAdx) * g.weight[k] * dxdr;
+      Vector2d tmp = dBdQ * dGdx;
+
+      if(j==0) cout << tmp << endl;
+      b_area(ele0)         += -N[0]*dt*dt/2e0 * tmp(0) * g.weight[k] * dxdr;
+      b_area(ele1)         += -N[1]*dt*dt/2e0 * tmp(0) * g.weight[k] * dxdr;
+      b_flowQuantity(ele0) += -N[0]*dt*dt/2e0 * tmp(1) * g.weight[k] * dxdr;
+      b_flowQuantity(ele1) += -N[1]*dt*dt/2e0 * tmp(1) * g.weight[k] * dxdr;
 
       //fourth term
-      b_area(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, 5e-1) * dAdx) * g.weight[k] * dxdr;
-      b_area(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (dQQAdx + (betha / (2e0 * rho)) * pow(A, 5e-1) * dAdx) * g.weight[k] * dxdr;
-      b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2.0e0 * (-(Q * Q / A) * dQdx + (betha / 2e0 / rho) * pow(A, 5e-1) * dQdx + 2e0 * Q / A * dQQAdx + betha / rho * pow(A, -5e-1) * Q * dAdx) * g.weight[k] * dxdr;
+      tmp = dGdQ * dGdx;
+
+      if(j==0) cout << tmp << endl;
+      b_area(ele0)         += -dNdx.at(0) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
+      b_area(ele1)         += -dNdx.at(1) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
+      b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
+      b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
 
       //fifth term
-      b_flowQuantity(ele0) += N.at(0) * dt * (-K_R * Q / A + dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += N.at(1) * dt * (-K_R * Q / A + dt / 2e0 * K_R * K_R * Q / A / A) * g.weight[k] * dxdr;
+      b_area(ele0)         += N.at(0) * dt * B_LW(0) * g.weight[k] * dxdr;
+      b_area(ele1)         += N.at(1) * dt * B_LW(0) * g.weight[k] * dxdr;
+      b_flowQuantity(ele0) += N.at(0) * dt * B_LW(1) * g.weight[k] * dxdr;
+      b_flowQuantity(ele1) += N.at(1) * dt * B_LW(1) * g.weight[k] * dxdr;
     }
   }
 
+  cout << b_flowQuantity(0) << endl;
+  cout << b_flowQuantity(1) << endl;
 }
 
 void FLOW1D::output_init()
@@ -192,15 +239,15 @@ void FLOW1D::output(const int iter)
   {
     if (j == NODE_NUM / 4)
     {
-      ofs4 << betha * (sqrt(area[j]) - sqrt(A0)) << " ";
+      ofs4 << beta * (sqrt(area[j]) - sqrt(A0)) << " ";
     }
     if (j == NODE_NUM / 2)
     {
-      ofs5 << betha * (sqrt(area[j]) - sqrt(A0)) << " ";
+      ofs5 << beta * (sqrt(area[j]) - sqrt(A0)) << " ";
     }
     if (j == NODE_NUM * 3 / 4)
     {
-      ofs6 << betha * (sqrt(area[j]) - sqrt(A0)) << " ";
+      ofs6 << beta * (sqrt(area[j]) - sqrt(A0)) << " ";
     }
   }
 
@@ -252,7 +299,40 @@ void FLOW1D::exportVTP(const int iter)
 
   fprintf(fp, "</Lines>\n");
 
-  fprintf(fp,"<CellData>\n");
+  fprintf(fp,"<PointData>\n");
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"Area\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",area[i]);
+  }
+  fprintf(fp,"</DataArray>\n");
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"radius\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",sqrt(area[i]/PI));
+  }
+  fprintf(fp,"</DataArray>\n");
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"FlowRate\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",flowQuantity[i]);
+  }
+  fprintf(fp,"</DataArray>\n");
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"pressure\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",pressure[i]);
+  }
+  fprintf(fp,"</DataArray>\n");
+
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"RHS_area\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",b_area(i));
+  }
+  fprintf(fp,"</DataArray>\n");
+
+  fprintf(fp,"<DataArray type=\"Float32\" Name=\"RHS_Q\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+  for(int i=0;i<NODE_NUM;i++){
+    fprintf(fp,"%e\n",b_flowQuantity[i]);
+  }
+  fprintf(fp,"</DataArray>\n");
+
   // fprintf(fp,"<DataArray type=\"Int32\" Name=\"LV0\" NumberOfComponents=\"1\" format=\"appended\" offset=\"%d\"/>\n",numOfData);
   // numOfData += sizeof(int) + sizeof(int) * numOfVessel;
   // fprintf(fp,"<DataArray type=\"Int32\" Name=\"parent\" NumberOfComponents=\"1\" format=\"appended\" offset=\"%d\"/>\n",numOfData);
@@ -270,7 +350,7 @@ void FLOW1D::exportVTP(const int iter)
   // if(vesselType==VesselType::ARTERY){
   // fprintf(fp,"<DataArray type=\"Int32\" Name=\"WillisID\" NumberOfComponents=\"1\" format=\"appended\" offset=\"%d\"/>\n",numOfData);
   // }
-  fprintf(fp,"</CellData>\n");
+  fprintf(fp,"</PointData>\n");
 
   fprintf(fp, "</Piece>\n");
   fprintf(fp, "</PolyData>\n");
