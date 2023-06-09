@@ -15,25 +15,7 @@ void FLOW1D::exec(const int iter)
 
   compute_RHS(b_area,b_flowQuantity,iter);
 
-  //boundary condition
-  for(int j=0;j<NODE_NUM;j++){
-    A_area(0,j) = 0e0;
-    A_area(NODE_NUM-1,j) = 0e0;
-  }
-  A_area(0,0) = 1e0;
-  A_area(NODE_NUM-1,NODE_NUM-1) = 1e0;
-
-  b_area(0) = A0;
-  b_area(NODE_NUM-1) = A0;
-
   Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
-
-  //boundary condition
-  for(int j=0;j<NODE_NUM;j++) A_flowQuantity(0,j) = 0e0;
-  A_flowQuantity(0,0) = 1e0;
-  // flowQuantity[0] = A0 * v0 * (1e0 + 1e-1 * sin(2e0 * M_PI * 5e0 * iter / M));
-  b_flowQuantity(0) = A0 * 1e0;
-
   Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
 
   for (int j = 0; j < NODE_NUM; j++)
@@ -81,8 +63,8 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
 
     array<double,2> G0,G1;
     G0[0] = flow0;
-    G0[1] = flow0*flow0/area0 + beta/(3e0*rho)*pow(area0,1.5e0);
     G1[0] = flow1;
+    G0[1] = flow0*flow0/area0 + beta/(3e0*rho)*pow(area0,1.5e0);
     G1[1] = flow1*flow1/area1 + beta/(3e0*rho)*pow(area1,1.5e0);
 
     array<double,2> B0,B1;
@@ -112,6 +94,7 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       Vector2d G,B,dGdx;
       G(0) = N[0]*G0[0]+N[1]*G1[0];
       G(1) = N[0]*G0[1]+N[1]*G1[1];
+      // if(j==0) cout <<"G " << G(0) << " " << G(1) << endl; 
 
       dGdx(0) = dNdx[0]*G0[0] + dNdx[1]*G1[0];
       dGdx(1) = dNdx[0]*G0[1] + dNdx[1]*G1[1];
@@ -140,16 +123,16 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       b_flowQuantity(ele1) += N.at(1) * Flow * g.weight[k] * dxdr;
 
       //second term
-      if(j==0) cout << G_LW << endl;
+      // if(j==0 || j==ELEMENT_NUM-1) cout <<"G_LW " << G_LW(0) << " " << G_LW(1) << endl;
       b_area(ele0)         += dNdx.at(0) * dt * G_LW(0) * g.weight[k] * dxdr;
-      b_area(ele1)         += dNdx.at(1) * dt * G_LW(0) * g.weight[k] * dxdr;
       b_flowQuantity(ele0) += dNdx.at(0) * dt * G_LW(1) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += dNdx.at(1) * dt * G_LW(1) * g.weight[k] * dxdr;
+      if(j!=ELEMENT_NUM-1){
+        b_area(ele1)         += dNdx.at(1) * dt * G_LW(0) * g.weight[k] * dxdr;
+        b_flowQuantity(ele1) += dNdx.at(1) * dt * G_LW(1) * g.weight[k] * dxdr;
+      }
 
       //third term
       Vector2d tmp = dBdQ * dGdx;
-
-      if(j==0) cout << tmp << endl;
       b_area(ele0)         += -N[0]*dt*dt/2e0 * tmp(0) * g.weight[k] * dxdr;
       b_area(ele1)         += -N[1]*dt*dt/2e0 * tmp(0) * g.weight[k] * dxdr;
       b_flowQuantity(ele0) += -N[0]*dt*dt/2e0 * tmp(1) * g.weight[k] * dxdr;
@@ -157,12 +140,13 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
 
       //fourth term
       tmp = dGdQ * dGdx;
-
-      if(j==0) cout << tmp << endl;
+      // if(j==ELEMENT_NUM-1) cout << "term4 " << tmp << endl;
       b_area(ele0)         += -dNdx.at(0) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
-      b_area(ele1)         += -dNdx.at(1) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
       b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
-      b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
+      if(j!=ELEMENT_NUM-1){
+        b_area(ele1)         += -dNdx.at(1) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
+        b_flowQuantity(ele1) += -dNdx.at(1) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
+      }
 
       //fifth term
       b_area(ele0)         += N.at(0) * dt * B_LW(0) * g.weight[k] * dxdr;
@@ -172,8 +156,13 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
     }
   }
 
-  cout << b_flowQuantity(0) << endl;
-  cout << b_flowQuantity(1) << endl;
+  // cout <<"b_f0 " << b_flowQuantity(0) << endl;
+  // cout <<"b_f1 " << b_flowQuantity(1) << endl;
+  // cout <<"b_f2 " << b_flowQuantity(2) << endl;
+  // cout <<"b_f3 " << b_flowQuantity(3) << endl;
+  // cout <<"b_f4 " << b_flowQuantity(4) << endl;
+
+  // cout <<"b_fend " << b_flowQuantity(NODE_NUM-1) << endl;
 }
 
 void FLOW1D::output_init()
