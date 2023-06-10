@@ -10,13 +10,13 @@ void FLOW1D::exec(const int iter)
   MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
   VectorXd b_flowQuantity = VectorXd::Zero(NODE_NUM);
 
-  compute_LHS(A_area,A_flowQuantity);
+  compute_LHS(A_area, A_flowQuantity);
 
   // 境界条件
   area[NODE_NUM - 1] = A0;
   flowQuantity[0] = A0 * v0 * (1e0 + 1e-1 * sin(2e0 * M_PI * 5e0 * iter / M));
 
-  compute_RHS(b_area,b_flowQuantity,iter);
+  compute_RHS(b_area, b_flowQuantity, iter);
 
   Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
   Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
@@ -28,7 +28,7 @@ void FLOW1D::exec(const int iter)
   }
 }
 
-void FLOW1D::compute_LHS(Eigen::MatrixXd &A_area,Eigen::MatrixXd &A_flowQuantity)
+void FLOW1D::compute_LHS(Eigen::MatrixXd &A_area, Eigen::MatrixXd &A_flowQuantity)
 {
   ShapeFunction1D shape;
   for (int j = 0; j < ELEMENT_NUM; j++)
@@ -60,7 +60,7 @@ void FLOW1D::compute_LHS(Eigen::MatrixXd &A_area,Eigen::MatrixXd &A_flowQuantity
   }
 }
 
-void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity,const int iter)
+void FLOW1D::compute_RHS(Eigen::VectorXd &b_area, Eigen::VectorXd &b_flowQuantity, const int iter)
 {
   RightPart rightPart = RightPart::newRightPart();
   vector<int> indices = {}; // 右辺の1~5項の内、計算をskipするものを指定する, (example) {2,4}
@@ -166,41 +166,40 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       }
     }
   }
-
 }
 
 void FLOW1D::output(const int iter)
 {
   int iteratedTime;
 
-  fstream ifsIteratedTime("output/dat/iteratedTime.dat",ios::app);
+  fstream ifsIteratedTime("output/dat/iteratedTime.dat", ios::app);
   ifsIteratedTime >> iteratedTime;
   ifsIteratedTime.close();
 
-  ofstream ofs("output/dat/flowQuantity.dat",ios::app);
+  ofstream ofs("output/dat/flowQuantity.dat", ios::app);
   for (int j = 0; j < NODE_NUM; j++)
   {
     ofs << flowQuantity[j] << " ";
   }
   ofs.close();
 
-  ofstream ofs2("output/dat/area.dat",ios::app);
+  ofstream ofs2("output/dat/area.dat", ios::app);
   for (int j = 0; j < NODE_NUM; j++)
   {
     ofs2 << area[j] << " ";
   }
   ofs2.close();
 
-  ofstream ofs3("output/dat/velocity.dat",ios::app);
+  ofstream ofs3("output/dat/velocity.dat", ios::app);
   for (int j = 0; j < NODE_NUM; j++)
   {
     ofs3 << flowQuantity[j] / area[j] << " ";
   }
   ofs3.close();
 
-  ofstream ofs4("output/dat/pressure1.dat",ios::app);
-  ofstream ofs5("output/dat/pressure2.dat",ios::app);
-  ofstream ofs6("output/dat/pressure3.dat",ios::app);
+  ofstream ofs4("output/dat/pressure1.dat", ios::app);
+  ofstream ofs5("output/dat/pressure2.dat", ios::app);
+  ofstream ofs6("output/dat/pressure3.dat", ios::app);
   for (int j = 0; j < NODE_NUM; j++)
   {
     if (j == NODE_NUM / 4)

@@ -1,16 +1,16 @@
 #ifndef _FLOW1D_H_
 #define _FLOW1D_H_
 
-//##################################################################################
+// ##################################################################################
 //
-// 1D flow simulator
+//  1D flow simulator
 //
-// Copyright (c) 2023 Biomechanics Lab.,
-//                    Graduate School of Engineering Science and Bioengineering,
-//                    Osaka University.
-// All rights reserved.
+//  Copyright (c) 2023 Biomechanics Lab.,
+//                     Graduate School of Engineering Science and Bioengineering,
+//                     Osaka University.
+//  All rights reserved.
 //
-//##################################################################################
+// ##################################################################################
 
 /**
  * @file   flow1D.h
@@ -44,10 +44,9 @@
 #include "Eigen/Core"
 #include "Eigen/LU"
 
-class FLOW1D {
- public:
-  
-
+class FLOW1D
+{
+public:
   int ELEMENT_NUM = 100;
   int NODE_NUM = ELEMENT_NUM + 1;
 
@@ -79,11 +78,9 @@ class FLOW1D {
   void output(const int iter);
   void exec(const int iter);
 
- private:
-  void compute_LHS(Eigen::MatrixXd &A_area,Eigen::MatrixXd &A_flowQuantity);
-  void compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity,const int iter);
-
+private:
+  void compute_LHS(Eigen::MatrixXd &A_area, Eigen::MatrixXd &A_flowQuantity);
+  void compute_RHS(Eigen::VectorXd &b_area, Eigen::VectorXd &b_flowQuantity, const int iter);
 };
-
 
 #endif
