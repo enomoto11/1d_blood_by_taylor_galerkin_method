@@ -21,7 +21,7 @@ int main(int argc,char *argv[])
   flow1D.init(5);
   flow1D.output_init();
 
-  int output_iter = 1000;
+  int output_iter = 10;
 
   //boundary condition
   double v0 = 1e-2;
@@ -29,10 +29,9 @@ int main(int argc,char *argv[])
 
   double time = 0e0;
 
-  for (int iter = 0; iter < 100000; iter++)
+  for (int iter = 0; iter <= 3000; iter++)
   {
     time += flow1D.dt;
-    if(iter==10000) v0 = 0e0;
 
     flow1D.exec(iter);
     flow1D.output(iter);
@@ -41,7 +40,6 @@ int main(int argc,char *argv[])
     }
 
   //boundary 
-  flow1D.area[0] = flow1D.A0;  
   flow1D.flowQuantity[0] = flow1D.A0 * v0;
   
   }

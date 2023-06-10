@@ -56,13 +56,13 @@ class FLOW1D {
 
   // const double L = 1.0e0;                                     // tubeの長さ[m]
   const int M = 1200;                                          // 時間ステップ数[-]
-  const double dt = 1e-05;                                   // 時間刻み[s]
+  const double dt = 1e-03;                                   // 時間刻み[s]
   // const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
   const double PI = M_PI;                                      // 円周率
   const double r0 = 2e-02;                                   // 初期状態のtubeの半径[m]
   const double h0 = 1e-2*r0;                                  // 初期状態のtubeの厚さ[m]
   const double A0 = PI * pow(r0-h0, 2.0e0);                  // 初期状態のtubeの流路面積（位置座標によらない）[m^2]
-  const double K_R = 0e0;                                    // 粘性抵抗K_R[m^2/s]
+  const double K_R = 1e-5;                                    // 粘性抵抗K_R[m^2/s]
   const double rho = 1.04e3;                                   // 密度[kg/m^3]
   const double E = 1e4;                                     // ヤング率(0.1MPa)[Pa]
   const double beta = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // beta

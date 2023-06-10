@@ -61,20 +61,7 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
     double flow0 = flowQuantity[ele0], flow1 = flowQuantity[ele1];
     double area0 = area[ele0], area1 = area[ele1];
 
-    array<double,2> G0,G1;
-    G0[0] = flow0;
-    G1[0] = flow1;
-    G0[1] = flow0*flow0/area0 + beta/(3e0*rho)*pow(area0,1.5e0);
-    G1[1] = flow1*flow1/area1 + beta/(3e0*rho)*pow(area1,1.5e0);
-
-    array<double,2> B0,B1;
-    B0[0] = 0e0;
-    B0[1] = -K_R*flow0/area0; //dbdx = 0
-    B1[0] = 0e0;
-    B1[1] = -K_R*flow1/area1; //dbdx = 0
-
     Gauss g(1);
-  
     vector<double> N(2),dNdr(2),dNdx(2);
 
     for (int k = 0; k < 2; k++)
@@ -91,16 +78,18 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       double Flow = N.at(0) * flow0 + N.at(1) * flow1;
       double Area = N.at(0) * area0 + N.at(1) * area1;
 
+      double dFlow_dx = dNdx[0] * flow0 + dNdx[1] * flow1;
+      double dAdx = dNdx[0] * area0 + dNdx[1] * area1;
+
       Vector2d G,B,dGdx;
-      G(0) = N[0]*G0[0]+N[1]*G1[0];
-      G(1) = N[0]*G0[1]+N[1]*G1[1];
-      // if(j==0) cout <<"G " << G(0) << " " << G(1) << endl; 
+      G(0) = Flow;
+      G(1) = Flow*Flow/Area + beta/(3e0*rho)*pow(Area,1.5e0);
 
-      dGdx(0) = dNdx[0]*G0[0] + dNdx[1]*G1[0];
-      dGdx(1) = dNdx[0]*G0[1] + dNdx[1]*G1[1];
+      dGdx(0) = dFlow_dx;
+      dGdx(1) = 2e0*Flow/Area*dFlow_dx - Flow*Flow/(Area*Area)*dAdx + 5e-1*beta/rho*sqrt(Area)*dAdx;
 
-      B(0) = N[0]*B0[0]+N[1]*B1[0];
-      B(1) = N[0]*B0[1]+N[1]*B1[1];
+      B(0) = 0e0;
+      B(1) = -K_R*Flow/Area;
 
       Matrix2d dGdQ,dBdQ;
       dGdQ(0,0) = 0e0;
@@ -123,7 +112,6 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       b_flowQuantity(ele1) += N.at(1) * Flow * g.weight[k] * dxdr;
 
       //second term
-      // if(j==0 || j==ELEMENT_NUM-1) cout <<"G_LW " << G_LW(0) << " " << G_LW(1) << endl;
       b_area(ele0)         += dNdx.at(0) * dt * G_LW(0) * g.weight[k] * dxdr;
       b_flowQuantity(ele0) += dNdx.at(0) * dt * G_LW(1) * g.weight[k] * dxdr;
       if(j!=ELEMENT_NUM-1){
@@ -140,7 +128,6 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
 
       //fourth term
       tmp = dGdQ * dGdx;
-      // if(j==ELEMENT_NUM-1) cout << "term4 " << tmp << endl;
       b_area(ele0)         += -dNdx.at(0) * dt * dt / 2e0 * tmp(0) * g.weight[k] * dxdr;
       b_flowQuantity(ele0) += -dNdx.at(0) * dt * dt / 2e0 * tmp(1) * g.weight[k] * dxdr;
       if(j!=ELEMENT_NUM-1){
@@ -155,14 +142,6 @@ void FLOW1D::compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity
       b_flowQuantity(ele1) += N.at(1) * dt * B_LW(1) * g.weight[k] * dxdr;
     }
   }
-
-  // cout <<"b_f0 " << b_flowQuantity(0) << endl;
-  // cout <<"b_f1 " << b_flowQuantity(1) << endl;
-  // cout <<"b_f2 " << b_flowQuantity(2) << endl;
-  // cout <<"b_f3 " << b_flowQuantity(3) << endl;
-  // cout <<"b_f4 " << b_flowQuantity(4) << endl;
-
-  // cout <<"b_fend " << b_flowQuantity(NODE_NUM-1) << endl;
 }
 
 void FLOW1D::output_init()
