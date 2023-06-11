@@ -23,12 +23,23 @@ int main(int argc,char *argv[])
   int output_iter = 10;
 
   //boundary condition
-  double v0 = 1e-2;
-  flow1D.flowQuantity[0] = v0 * flow1D.A0;
+  flow1D.flowQuantity[0] = flow1D.v0 * flow1D.A0;
 
   double time = 0e0;
 
-  for (int iter = 0; iter <= 3000; iter++)
+  flow1D.A_area = Eigen::MatrixXd::Zero(flow1D.NODE_NUM, flow1D.NODE_NUM);
+  flow1D.A_flowQuantity = Eigen::MatrixXd::Zero(flow1D.NODE_NUM, flow1D.NODE_NUM);
+
+  flow1D.compute_LHS(flow1D.A_area);
+  flow1D.compute_LHS(flow1D.A_flowQuantity);
+
+  for(int i=0;i<flow1D.NODE_NUM;i++) flow1D.A_area(0,i) = 0e0;
+  flow1D.A_area(0,0) = 1e0;
+
+  for(int i=0;i<flow1D.NODE_NUM;i++) flow1D.A_flowQuantity(0,i) = 0e0;
+  flow1D.A_flowQuantity(0,0) = 1e0;
+
+  for (int iter = 0; iter <= flow1D.iterMax; iter++)
   {
     time += flow1D.dt;
 
@@ -37,9 +48,5 @@ int main(int argc,char *argv[])
     if(iter%output_iter==0){
       flow1D.exportVTP(iter/output_iter);
     }
-
-  //boundary 
-  flow1D.flowQuantity[0] = flow1D.A0 * v0;
-  
   }
 }

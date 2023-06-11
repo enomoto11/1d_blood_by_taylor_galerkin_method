@@ -5,15 +5,13 @@ using namespace Eigen;
 
 void FLOW1D::exec(const int iter)
 {
-  MatrixXd A_area = MatrixXd::Zero(NODE_NUM, NODE_NUM);
-  MatrixXd A_flowQuantity = MatrixXd::Zero(NODE_NUM, NODE_NUM);
   b_area = VectorXd::Zero(NODE_NUM);
   b_flowQuantity = VectorXd::Zero(NODE_NUM);
 
-  compute_LHS(A_area);
-  A_flowQuantity = A_area;
-
   compute_RHS(b_area, b_flowQuantity, iter);
+
+  b_area(0) = A0;  // boundary condition
+  b_flowQuantity(0) = A0 * v0;  // boundary condition
 
   Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
   Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);

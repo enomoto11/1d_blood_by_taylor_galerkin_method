@@ -55,7 +55,7 @@ public:
   std::vector<double> x;
 
   // const double L = 1.0e0;                                     // tubeの長さ[m]
-  const int M = 1200;                                          // 時間ステップ数[-]
+  const int iterMax = 3000;                                          // 時間ステップ数[-]
   const double dt = 1e-03;                                   // 時間刻み[s]
   // const double DELTA_X = L / ELEMENT_NUM;                      // 要素の長さ[m]
   const double PI = M_PI;                                      // 円周率
@@ -66,7 +66,10 @@ public:
   const double rho = 1.04e3;                                   // 密度[kg/m^3]
   const double E = 1e4;                                     // ヤング率(0.1MPa)[Pa]
   const double beta = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // beta
-  double v0 = 0e0;                                           // 所定位置における初期状態のtubeの流速[m/s]
+  double v0 = 1e-2;                                           // 所定位置における初期状態のtubeの流速[m/s]
+
+  Eigen::MatrixXd A_area;
+  Eigen::MatrixXd A_flowQuantity;
 
   std::vector<double> area = std::vector(NODE_NUM, 0e0);
   std::vector<double> velocity = std::vector(NODE_NUM, 0e0);
@@ -80,13 +83,14 @@ public:
   void output(const int iter);
   void exec(const int iter);
 
+  void compute_LHS(Eigen::MatrixXd &A);
+
   void exportVTP(const int iter);
 
  private:
   Eigen::VectorXd b_area;
   Eigen::VectorXd b_flowQuantity;
 
-  void compute_LHS(Eigen::MatrixXd &A);
   void compute_RHS(Eigen::VectorXd &b_area,Eigen::VectorXd &b_flowQuantity,const int iter);
 };
 
