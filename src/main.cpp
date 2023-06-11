@@ -1,4 +1,3 @@
-
 #include "flow1D.h"
 
 #ifdef _GLOG
