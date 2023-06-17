@@ -7,3 +7,5 @@ main
 .DS_STORE
 
 /build
+
+/src/Eigen

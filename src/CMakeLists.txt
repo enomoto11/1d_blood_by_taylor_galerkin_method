@@ -16,7 +16,7 @@ elseif()
   set(compile_options_tmp ${base_compile_options})
 endif()
 
-string(REPLACE " " ";" compile_options_tmp ${compile_options_tmp})
+# string(REPLACE " " ";" compile_options_tmp ${compile_options_tmp})
 
 set(main_target "TaylorGalerkin")
 
