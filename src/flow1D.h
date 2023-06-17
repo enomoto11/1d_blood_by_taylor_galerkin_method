@@ -41,8 +41,8 @@
 #include "exception-args.h"
 #include "exception-manager.h"
 
-#include "Eigen/Core"
-#include "Eigen/LU"
+#include "../lib/eigen/Eigen/Core"
+#include "../lib/eigen/Eigen/LU"
 
 class FLOW1D
 {
@@ -50,7 +50,7 @@ public:
   int ELEMENT_NUM = 100;
   int NODE_NUM = ELEMENT_NUM + 1;
 
-  std::vector<std::vector<double>> element = std::vector(ELEMENT_NUM, std::vector<double>(3, 0));
+  std::vector<std::vector<double>> element = std::vector<std::vector<double>>(ELEMENT_NUM, std::vector<double>(3, 0));
   std::vector<double> x;
 
   const double L = 1.0e-1;                                     // tubeの長さ[m]
@@ -67,10 +67,10 @@ public:
   const double betha = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // ß
   double v0 = 1.0e0;                                           // 所定位置における初期状態のtubeの流速[m/s]
 
-  std::vector<double> area = std::vector(NODE_NUM, 0e0);
-  std::vector<double> velocity = std::vector(NODE_NUM, 0e0);
-  std::vector<double> flowQuantity = std::vector(NODE_NUM, 0e0);
-  std::vector<double> pressure = std::vector(NODE_NUM, 0e0);
+  std::vector<double> area = std::vector<double>(NODE_NUM, 0e0);
+  std::vector<double> velocity = std::vector<double>(NODE_NUM, 0e0);
+  std::vector<double> flowQuantity = std::vector<double>(NODE_NUM, 0e0);
+  std::vector<double> pressure = std::vector<double>(NODE_NUM, 0e0);
 
   void input();
   void init(int toggle);
