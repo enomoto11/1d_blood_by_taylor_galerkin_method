@@ -17,13 +17,14 @@ int main(int argc, char *argv[])
 
   flow1D.input();
 
-  flow1D.init(5);
+  flow1D.init();
   flow1D.output_init();
 
   int output_iter = 10;
+  double v0 = flow1D.initInflowVelocity(0);
 
   // boundary condition
-  flow1D.flowQuantity[0] = flow1D.v0 * flow1D.A0;
+  flow1D.flowQuantity[0] = v0 * flow1D.A0;
 
   double time = 0e0;
 
@@ -50,6 +51,7 @@ int main(int argc, char *argv[])
     if (iter % output_iter == 0)
     {
       flow1D.exportVTP(iter / output_iter);
+      flow1D.exportVTUWith3D(iter / output_iter);
     }
   }
 }
