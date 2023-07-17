@@ -91,7 +91,7 @@ public:
   void compute_LHS(Eigen::MatrixXd &A);
 
   void exportVTP(const int iter);
-  void exportVTPWith3D(const int iter);
+  void exportVTUWith3D(const int iter);
 
 private:
   Eigen::VectorXd b_area;

@@ -360,7 +360,7 @@ void FLOW1D::exportVTP(const int iter)
   fclose(fp);
 }
 
-void FLOW1D::exportVTPWith3D(const int iter)
+void FLOW1D::exportVTUWith3D(const int iter)
 {
   string file = "output/vtu/data_" + to_string(iter) + ".vtu";
   int CIRC_NUM = 20; // number of points around the circumference

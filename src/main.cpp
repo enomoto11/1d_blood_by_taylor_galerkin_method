@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     if (iter % output_iter == 0)
     {
       flow1D.exportVTP(iter / output_iter);
-      flow1D.exportVTPWith3D(iter / output_iter);
+      flow1D.exportVTUWith3D(iter / output_iter);
     }
   }
 }
