@@ -156,21 +156,25 @@ def visualizePressure(file1, file2, file3, output_file):
     fig.savefig(output_file)
 
 
-# Execute the functions
-visualizeVelocity(
-    "output/dat/velocity.dat", "output/dat/iteratedTime.dat", "output/png/velocity.png"
-)
-visualizeArea(
-    "output/dat/area.dat", "output/dat/iteratedTime.dat", "output/png/area.png"
-)
-visualizeFlowQuantity(
-    "output/dat/flowQuantity.dat",
-    "output/dat/iteratedTime.dat",
-    "output/png/flowQuantity.png",
-)
+# # Execute the functions
+# visualizeVelocity(
+#     "src/Flow1D/output/dat/velocity.dat",
+#     "src/Flow1D/output/dat/iteratedTime.dat",
+#     "src/Flow1D/output/png/velocity.png",
+# )
+# visualizeArea(
+#     "src/Flow1D/output/dat/area.dat",
+#     "src/Flow1D/output/dat/iteratedTime.dat",
+#     "src/Flow1D/output/png/area.png",
+# )
+# visualizeFlowQuantity(
+#     "src/Flow1D/output/dat/flowQuantity.dat",
+#     "src/Flow1D/output/dat/iteratedTime.dat",
+#     "src/Flow1D/output/png/flowQuantity.png",
+# )
 visualizePressure(
-    "output/dat/pressure1.dat",
-    "output/dat/pressure2.dat",
-    "output/dat/pressure3.dat",
-    "output/png/pressure.png",
+    "src/Flow1D/output/dat/pressure1.dat",
+    "src/Flow1D/output/dat/pressure2.dat",
+    "src/Flow1D/output/dat/pressure3.dat",
+    "src/Flow1D/output/png/pressure.png",
 )

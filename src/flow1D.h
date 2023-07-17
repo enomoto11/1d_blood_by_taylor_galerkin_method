@@ -68,6 +68,7 @@ public:
   const double E = 1e4;                                       // ヤング率(0.1MPa)[Pa]
   const double beta = 4.0e0 / 3.0e0 * sqrt(PI) * h0 * E / A0; // beta
   double v0 = 1e-2;                                           // 所定位置における初期状態のtubeの流速[m/s]
+  const double kappa = 1e2;                                   // betaの係数
 
   Eigen::MatrixXd A_area;
   Eigen::MatrixXd A_flowQuantity;
@@ -76,6 +77,9 @@ public:
   std::vector<double> velocity = std::vector<double>(NODE_NUM, 0e0);
   std::vector<double> flowQuantity = std::vector<double>(NODE_NUM, 0e0);
   std::vector<double> pressure = std::vector<double>(NODE_NUM, 0e0);
+
+  double getA0(double _x);
+  double getBeta(double _x);
 
   void input();
   void init(int toggle);
@@ -87,6 +91,7 @@ public:
   void compute_LHS(Eigen::MatrixXd &A);
 
   void exportVTP(const int iter);
+  void exportVTPWith3D(const int iter);
 
 private:
   Eigen::VectorXd b_area;

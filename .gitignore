@@ -10,4 +10,6 @@ main
 
 *.vtp
 
+*.vtu
+
 /src/Eigen
