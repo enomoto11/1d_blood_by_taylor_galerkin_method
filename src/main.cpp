@@ -6,12 +6,12 @@
 
 using namespace std;
 
-int main(int argc,char *argv[])
+int main(int argc, char *argv[])
 {
-  #ifdef _GLOG
-    google::InitGoogleLogging(argv[0]);
-    google::InstallFailureSignalHandler();
-  #endif
+#ifdef _GLOG
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+#endif
 
   FLOW1D flow1D;
 
@@ -22,7 +22,7 @@ int main(int argc,char *argv[])
 
   int output_iter = 10;
 
-  //boundary condition
+  // boundary condition
   flow1D.flowQuantity[0] = flow1D.v0 * flow1D.A0;
 
   double time = 0e0;
@@ -33,11 +33,13 @@ int main(int argc,char *argv[])
   flow1D.compute_LHS(flow1D.A_area);
   flow1D.compute_LHS(flow1D.A_flowQuantity);
 
-  for(int i=0;i<flow1D.NODE_NUM;i++) flow1D.A_area(0,i) = 0e0;
-  flow1D.A_area(0,0) = 1e0;
+  for (int i = 0; i < flow1D.NODE_NUM; i++)
+    flow1D.A_area(0, i) = 0e0;
+  flow1D.A_area(0, 0) = 1e0;
 
-  for(int i=0;i<flow1D.NODE_NUM;i++) flow1D.A_flowQuantity(0,i) = 0e0;
-  flow1D.A_flowQuantity(0,0) = 1e0;
+  for (int i = 0; i < flow1D.NODE_NUM; i++)
+    flow1D.A_flowQuantity(0, i) = 0e0;
+  flow1D.A_flowQuantity(0, 0) = 1e0;
 
   for (int iter = 0; iter <= flow1D.iterMax; iter++)
   {
@@ -45,8 +47,9 @@ int main(int argc,char *argv[])
 
     flow1D.exec(iter);
     flow1D.output(iter);
-    if(iter%output_iter==0){
-      flow1D.exportVTP(iter/output_iter);
+    if (iter % output_iter == 0)
+    {
+      flow1D.exportVTP(iter / output_iter);
     }
   }
 }

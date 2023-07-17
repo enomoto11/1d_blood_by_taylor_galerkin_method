@@ -47,7 +47,7 @@ if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 endif("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
 #change default install prefix
-set(INSTALL_DIR "/usr/local/Flow1D")
+set(INSTALL_DIR "/Users/t-enomoto/research/1d_blood/src/Flow1D")
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX ${INSTALL_DIR} CACHE PATH "..." FORCE)
 endif()
