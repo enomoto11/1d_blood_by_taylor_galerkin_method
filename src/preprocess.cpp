@@ -4,7 +4,7 @@ using namespace std;
 
 void FLOW1D::input()
 {
-  fstream ifs1("input/element_d.dat");
+  fstream ifs1("../../input/element_d.dat");
   for (int i = 0; i < ELEMENT_NUM; i++)
   {
     vector<double> element_t(2, 0);
@@ -17,7 +17,7 @@ void FLOW1D::input()
   ifs1.close();
 
   string str;
-  ifstream ifs2("input/node_d.dat");
+  ifstream ifs2("../../input/node_d.dat");
   while (getline(ifs2, str))
   {
     istringstream ss(str);
