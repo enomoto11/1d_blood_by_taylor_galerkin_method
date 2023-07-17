@@ -31,7 +31,6 @@ target_compile_options(${main_target} PUBLIC ${compile_options_tmp})
 
 target_link_libraries(${main_target} PRIVATE
   ${GLOG_LIBRARY}
-  iomp5
 )
 
 target_include_directories(${main_target} PRIVATE
