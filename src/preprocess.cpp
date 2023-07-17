@@ -33,95 +33,19 @@ void FLOW1D::input()
   ifs2.close();
 }
 
-void FLOW1D::init(int toggle)
+void FLOW1D::init()
 {
-  if (toggle == 0)
+  const double area0 = getA0(0e0);
+  const double velocity0 = initInflowVelocity(0);
+
+  area[0] = area0;
+  velocity[0] = velocity0;
+  flowQuantity[0] = area[0] * velocity[0];
+  for (int i = 1; i < NODE_NUM; i++)
+  // for (int i = 0; i < NODE_NUM; i++)
   {
-    for (int i = 0; i < NODE_NUM; i++)
-    {
-      area[i] = A0;
-      velocity[i] = v0;
-      flowQuantity[i] = area[i] * velocity[i];
-    }
-  }
-  else if (toggle == 1)
-  {
-    for (int i = 0; i < NODE_NUM; i++)
-    {
-      double rate = 1.1e0;
-      if (i == 0)
-      {
-        area[i] = A0;
-        velocity[i] = 0e0;
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-      else if (i != 0 && i < NODE_NUM / 3)
-      {
-        area[i] = A0 / rate;
-        velocity[i] = v0 * rate;
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-      else
-      {
-        area[i] = A0;
-        velocity[i] = v0;
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-    }
-  }
-  else if (toggle == 2)
-  {
-    for (int i = 0; i < NODE_NUM; i++)
-    {
-      area[i] = A0;
-      if (i == 0)
-      {
-        velocity[i + 1] = velocity[i];
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-      if (i == NODE_NUM - 2)
-      {
-        velocity[i] = velocity[i + 1];
-      }
-    }
-  }
-  else if (toggle == 3)
-  {
-    for (int i = 0; i < NODE_NUM; i++)
-    {
-      if (i < NODE_NUM / 2e0)
-      {
-        area[i] = A0;
-        velocity[i] = v0;
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-      else
-      {
-        area[i] = A0;
-        velocity[i] = v0 / 2e0;
-        flowQuantity[i] = area[i] * velocity[i];
-      }
-    }
-  }
-  else if (toggle == 4)
-  {
-    for (int i = 0; i < NODE_NUM; i++)
-    {
-      area[i] = A0;
-      velocity[i] = v0 * 10;
-      flowQuantity[i] = area[i] * velocity[i];
-    }
-  }
-  else if (toggle == 5)
-  {
-    area[0] = A0;
-    velocity[0] = v0;
-    flowQuantity[0] = area[0] * velocity[0];
-    for (int i = 1; i < NODE_NUM; i++)
-    {
-      area[i] = A0;
-      velocity[i] = v0 / 1e2;
-      flowQuantity[i] = area[i] * velocity[i];
-    }
+    area[i] = getA0(i / NODE_NUM);
+    velocity[i] = velocity0 / 5e0;
+    flowQuantity[i] = area[i] * velocity[i];
   }
 }

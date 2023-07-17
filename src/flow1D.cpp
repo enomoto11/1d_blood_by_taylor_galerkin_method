@@ -37,6 +37,13 @@ double FLOW1D::getBeta(double _x)
   }
 }
 
+double FLOW1D::initInflowVelocity(const int iter)
+{
+  double omega = 2e0 * PI / T;
+
+  return v0 * (1e0 - 4e-1 * sin(omega * iter * dt) - 4e-1 * sin(2e0 * omega * iter * dt) - 2e-1 * cos(2e0 * omega * iter * dt));
+}
+
 void FLOW1D::exec(const int iter)
 {
   b_area = VectorXd::Zero(NODE_NUM);
@@ -45,9 +52,10 @@ void FLOW1D::exec(const int iter)
   compute_RHS(b_area, b_flowQuantity, iter);
 
   const double area0 = getA0(0e0);
+  const double velocity0 = initInflowVelocity(iter);
 
-  b_area(0) = area0;              // boundary condition
-  b_flowQuantity(0) = area0 * v0; // boundary condition
+  b_area(0) = area0;                     // boundary condition
+  b_flowQuantity(0) = area0 * velocity0; // boundary condition
 
   Eigen::VectorXd x_area = A_area.fullPivLu().solve(b_area);
   Eigen::VectorXd x_flowQuantity = A_flowQuantity.fullPivLu().solve(b_flowQuantity);
